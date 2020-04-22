@@ -1,5 +1,6 @@
-from hdo import app
+
 from flask import Flask
+from flask import current_app as app
 
 @app.route('/')
 def hello_world():
