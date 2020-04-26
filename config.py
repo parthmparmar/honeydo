@@ -4,11 +4,13 @@ class Config(object):
     #DATABASE_URI = 'sqlite:///:memory:'
 
 class ProductionConfig(Config):
-    #SQLALCHEMY_DATABASE_URI='postgresql://[postgres]:[2123]@localhost/[dbName]'
+
     DEBUG = False
 
 class DevelopmentConfig(Config):
+    SQLALCHEMY_DATABASE_URI='postgresql://postgres:2123@localhost/honeydo'
     DEBUG = True
+    SECRET_KEY = 'thisisthesecretkey'
 
 class TestingConfig(Config):
     TESTING = True

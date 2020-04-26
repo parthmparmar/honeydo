@@ -1,6 +1,6 @@
-from hdo import create_app
-
-app = create_app()
+from hdo import app
 
 if __name__ == "__main__":
     app.run()
+
+#db.create_all()
