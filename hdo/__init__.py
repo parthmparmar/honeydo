@@ -1,14 +1,17 @@
 from flask import Flask
-#from models import db
 from config import *
+from .extensions import db
+from hdo import models
+from flask_bootstrap import Bootstrap
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
-def create_app():
-    app = Flask(__name__,instance_relative_config=False)
-    app.config.from_object('config.DevelopmentConfig')
-    # app.run()
+app = Flask(__name__,instance_relative_config=False)
+app.config.from_object('config.DevelopmentConfig')
+db.init_app(app)
+#login = LoginManager(app)
+Bootstrap(app) #might need to be moved
 
-    with app.app_context():
-        from . import views
+from hdo import views
 
-    return app
-    #db.init_app(app)
+with app.app_context():
+    db.create_all()
