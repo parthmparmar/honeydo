@@ -1,4 +1,5 @@
 from hdo import db
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 class Users(db.Model):  #accessing Model class of SQLAlchemy
 	__tablename__ = "Users"
@@ -9,6 +10,7 @@ class Users(db.Model):  #accessing Model class of SQLAlchemy
 	active=db.Column(db.Integer)
 	last_login=db.Column(db.DateTime)
 
+#all __init__ functions seem to be causing issues with the primary_key behavior, so I have commented them out
 '''	def __init__(self,id,email,name, hash_password,active,last_login):
 		self.id=id
 		self.email=email
@@ -24,10 +26,10 @@ class Lists(db.Model):  #accessing Model class of SQLAlchemy
 	list_owner=db.Column(db.String)
 
 
-	def __init__(self,list_id,list_name,list_owner):
+	'''def __init__(self,list_id,list_name,list_owner):
 		self.list_id=list_id
 		self.list_name=list_name
-		self.list_owner=list_owner
+		self.list_owner=list_owner'''
 
 class Tasks(db.Model):  #accessing Model class of SQLAlchemy
 	__tablename__ = "Tasks"
@@ -41,7 +43,7 @@ class Tasks(db.Model):  #accessing Model class of SQLAlchemy
 	points=db.Column(db.Integer)
 	repeat=db.Column(db.Integer)
 
-	def __init__(self,task_id,list_id,task_name,task_owner,due_date,reset_time,state,points,repeat):
+	'''def __init__(self,task_id,list_id,task_name,task_owner,due_date,reset_time,state,points,repeat):
 		self.task_id=task_id
 		self.list_id=list_id
 		self.task_name=task_name
@@ -50,7 +52,7 @@ class Tasks(db.Model):  #accessing Model class of SQLAlchemy
 		self.reset_time=reset_time
 		self.state=state
 		self.points=points
-		self.repeat=repeat
+		self.repeat=repeat'''
 
 class Access(db.Model):  #accessing Model class of SQLAlchemy
 	__tablename__ = "Access"
@@ -60,8 +62,8 @@ class Access(db.Model):  #accessing Model class of SQLAlchemy
 	write=db.Column(db.Integer)
 
 
-	def __init__(self,access_id,list_id,user_id,write):
+	'''def __init__(self,access_id,list_id,user_id,write):
 		self.access_id=access_id
 		self.list_id=list_id
 		self.user_id=user_id
-		self.write=write
+		self.write=write'''

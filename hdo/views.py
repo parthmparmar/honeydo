@@ -6,21 +6,25 @@ from hdo.forms import LoginForm, RegisterForm
 from hdo.models import Users
 from hdo import db
 import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/')
 def hello_world():
+    #if current_user:
+        #return 'Hello ' + current_user.name
     return 'Hello World'
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm
+    form = LoginForm()
 
     if form.validate_on_submit():
         #return '<h1>' + form.email.data + ' ' + form.password.data + '</h1>'
         user = Users.query.filter_by(email=form.email.data).first()
         if user:
-            if user.password == form.password.data:
-                return redirect(url_for('lists.html'))
+            if check_password_hash(user.hash_password, form.password.data):#user.hash_password == form.password.data:
+                #login_user()
+                return render_template('lists.html') #will need to change to redirect when route is set up
 
         return 'Invalid username or password'
 
@@ -31,12 +35,15 @@ def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
-        new_user = Users(email = form.email.data, name = form.name.data , hash_password = form.password.data, active = 0, last_login = datetime.datetime.now())
+        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        new_user = Users(email = form.email.data, name = form.name.data , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
         db.session.add(new_user)
         db.session.commit()
 
         #return 'New user has been created!'
-        return '<h1>' + form.email.data + ' ' + form.password.data + '</h1>'
+        #return '<h1>' + form.email.data + ' ' + form.password.data + '</h1>'
+        return redirect(url_for("login"))
+
 
     return render_template('register.html', form=form)
 
