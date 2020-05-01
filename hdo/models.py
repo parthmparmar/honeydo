@@ -1,7 +1,7 @@
-from hdo import db
+from hdo import db, login
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
-class Users(db.Model):  #accessing Model class of SQLAlchemy
+class Users(UserMixin, db.Model):  #accessing Model class of SQLAlchemy
 	__tablename__ = "Users"
 	id=db.Column(db.Integer, primary_key=True)
 	email=db.Column(db.String, unique=True)
@@ -9,6 +9,10 @@ class Users(db.Model):  #accessing Model class of SQLAlchemy
 	hash_password=db.Column(db.String)
 	active=db.Column(db.Integer)
 	last_login=db.Column(db.DateTime)
+
+@login.user_loader
+def load_user(id):
+	return Users.query.get(int(id))
 
 #all __init__ functions seem to be causing issues with the primary_key behavior, so I have commented them out
 '''	def __init__(self,id,email,name, hash_password,active,last_login):
