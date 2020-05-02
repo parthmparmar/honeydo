@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, redirect, url_for, render_template, request, flash
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 #from flask_bootstrap import Bootstrap
@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 @app.route('/')
 def hello_world():
     try:
-        return "Hello" + current_user.name
+        return "Hello " + current_user.name
     except:
         return 'Hello World'
 
