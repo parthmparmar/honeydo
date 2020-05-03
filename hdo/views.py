@@ -1,7 +1,6 @@
 from flask import Flask, redirect, url_for, render_template, request, flash
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from hdo.forms import LoginForm, RegisterForm
 from hdo.models import Users, Lists, Access
 from hdo import db
 import datetime
@@ -53,20 +52,16 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegisterForm()
 
-    if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = Users(email = form.email.data, name = form.name.data , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
+    if request.method == "GET":
+        return render_template("register.html")
+
+    if request.method == "POST":
+        hashed_password = generate_password_hash(request.form["password"], method='sha256')
+        new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
         db.session.add(new_user)
         db.session.commit()
-
-        #return 'New user has been created!'
-        #return '<h1>' + form.email.data + ' ' + form.password.data + '</h1>'
         return redirect(url_for("login"))
-
-
-    return render_template('register.html', form=form)
 
 @app.route('/logout')
 @login_required
