@@ -24,10 +24,15 @@ def load_user(id):
 		self.last_login=last_login'''
 
 class Lists(db.Model):  #accessing Model class of SQLAlchemy
+	def as_dict(self):
+	       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 	__tablename__ = "Lists"
 	list_id=db.Column(db.Integer, primary_key=True)
-	list_name=db.Column(db.String)
-	list_owner=db.Column(db.String)
+	list_name=db.Column(db.String, nullable=False)
+	list_description=db.Column(db.String)
+	list_owner_id=db.Column(db.Integer, db.ForeignKey("Users.id"), nullable=False)
+	list_owner=db.relationship("Users", foreign_keys = [list_owner_id], lazy=True)
 
 
 	'''def __init__(self,list_id,list_name,list_owner):
@@ -61,9 +66,11 @@ class Tasks(db.Model):  #accessing Model class of SQLAlchemy
 class Access(db.Model):  #accessing Model class of SQLAlchemy
 	__tablename__ = "Access"
 	access_id=db.Column(db.Integer, primary_key=True)
-	list_id=db.Column(db.Integer)
-	user_id=db.Column(db.Integer)
-	write=db.Column(db.Integer)
+	list_id=db.Column(db.Integer, db.ForeignKey("Lists.list_id"), nullable=False)
+	list=db.relationship("Lists", foreign_keys = [list_id], lazy=True)
+	user_id=db.Column(db.Integer, db.ForeignKey("Users.id"), nullable=False)
+	user=db.relationship("Users", foreign_keys = [user_id], lazy=True)
+	write=db.Column(db.Boolean)
 
 
 	'''def __init__(self,access_id,list_id,user_id,write):
