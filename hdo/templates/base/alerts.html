@@ -1,0 +1,23 @@
+<div class="flash-msg mt-2 mb-2">
+
+  <div class="alert alert-warning d-none" role="alert">
+    error
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+  {% if messages %}
+  {% for category, message in messages %}
+  {% if cattogery == "message" %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {% else %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+  {% endif %}
+       {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}

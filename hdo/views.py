@@ -1,10 +1,11 @@
 from flask import Flask, redirect, url_for, render_template, request, flash
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from hdo.models import Users
+from hdo.models import Users, Lists, Access
 from hdo import db
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+import json
 
 @app.route('/')
 def hello_world():
@@ -27,7 +28,8 @@ def login():
         if user:
             if check_password_hash(user.hash_password, password):
                 login_user(user)
-                return render_template("lists.html")
+                flash("Welcome Back " + user.name, "success")
+                return redirect(url_for("dashboard"))
 
         return "Invalid Username or Password"
 
@@ -59,10 +61,47 @@ def register():
         new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
         db.session.add(new_user)
         db.session.commit()
-        return render_template("lists.html")
+        return redirect(url_for("login"))
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return 'You are now logged out'
+
+@app.route("/dashboard", methods=["GET"])
+def dashboard():
+    if request.method == "GET":
+        user_lists = Access.query.filter_by(user_id=current_user.id).all()
+        data = {"user_lists": user_lists}
+        return render_template("lists.html", data = data)
+
+@app.route("/list/<list_id>", methods=["GET"])
+def list_display(list_id):
+    if request.method == "GET":
+        list = Lists.query.filter_by(list_id = list_id).first()
+        return list.list_name + " -- " + list.list_owner.email
+
+@app.route("/api/list/add", methods=["POST"])
+def api_list():
+    if request.method == "POST":
+        list_name = request.form["list_name"]
+        new_list = Lists(list_name = list_name, list_owner_id= current_user.id)
+        db.session.add(new_list)
+        db.session.flush()
+        db.session.refresh(new_list)
+        list_id = new_list.list_id
+        new_access = Access(list_id = list_id, user_id = current_user.id)
+        db.session.add(new_access)
+        db.session.commit()
+        flash(list_name + " was added", "success")
+        return redirect(url_for("dashboard"))
+
+@app.route("/api/lists/get", methods=["GET"])
+def api_get_lists():
+    if request.method == "GET":
+        lists = Lists.query.all()
+        print(lists)
+        for list in lists:
+            print(list.list_owner.email)
+        return "test"

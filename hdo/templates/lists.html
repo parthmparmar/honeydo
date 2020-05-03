@@ -1,1 +1,27 @@
-Lists Page
+{% extends "base/base_html.html" %}
+{% block body %}
+
+<div class="container">
+  {% include "base/alerts.html" %}
+  <div class="lists-view">
+    <p>Lists:</p>
+    {% for list in data.user_lists %}
+      <p><a href="/list/{{list.list.list_id}}">{{list.list.list_name}}</a></p>
+    {% endfor %}
+  </div>
+  <div class="list-add-div">
+    <form class="add-list" action="/api/list/add" method="POST">
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <button class="btn btn-outline-secondary" type="submit">Add</button>
+        </div>
+        <input name="list_name" type="text" class="form-control" placeholder="Add a new list" required>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block javascript %}
+<script type="text/javascript" src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
+{% endblock %}
