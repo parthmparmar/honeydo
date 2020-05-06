@@ -43,10 +43,12 @@ class Lists(db.Model):  #accessing Model class of SQLAlchemy
 class Tasks(db.Model):  #accessing Model class of SQLAlchemy
 	__tablename__ = "Tasks"
 	task_id=db.Column(db.Integer, primary_key=True)
-	list_id=db.Column(db.Integer)
+	list_id=db.Column(db.Integer, db.ForeignKey("Lists.list_id"), nullable=False)
+	list=db.relationship("Lists", foreign_keys = [list_id], lazy=True)
 	task_name=db.Column(db.String)
-	task_owner=db.Column(db.String)
-	due_date=db.Column(db.DateTime)
+	task_owner_id=db.Column(db.Integer, db.ForeignKey("Users.id"), nullable=False)
+	task_owner=db.relationship("Users", foreign_keys = [task_owner_id], lazy=True)
+	due_date=db.Column(db.Date)
 	reset_time=db.Column(db.DateTime)
 	state=db.Column(db.Integer)
 	points=db.Column(db.Integer)
