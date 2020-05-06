@@ -1,4 +1,4 @@
-
+console.log("Test")
 function password_validation(password) {
   if (password.match(/[a-z]/g) && password.match(/[A-Z]/g) && password.match(/[0-9]/g) && password.match( /[^a-zA-Z\d]/g) && password.length >= 8){
       return true;

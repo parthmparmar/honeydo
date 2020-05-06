@@ -106,12 +106,14 @@ def api_list(list_id):
         return redirect(url_for("dashboard"))
 
     if request.method == "DELETE":
+        # TODO: check to see if user is the owner of the list
         list = Lists.query.filter_by(list_id = list_id).first()
         list_name = list.list_name
         db.session.delete(list)
         db.session.commit()
         flash(list_name + " was deleted!", "success")
         return "list deleted"
+        # TODO: check is deleting list will delete multiple items on the access table
         # todo: Do we also need to delete the task for this list?  How do we want to do that? SQLAlchemy Cascades
 
 @app.route("/api/lists/get", methods=["GET"])
@@ -125,8 +127,18 @@ def api_get_lists():
 
 @app.route("/api/access/<access_id>", methods=["GET", "POST", "DELETE"])
 def api_access(access_id):
+    if request.method == "POST":
+        user_id = request.args["user_id"]
+        list_id = request.args["list_id"]
+        new_access = Access(list_id = list_id, user_id = user_id)
+        db.session.add(new_access)
+        db.session.commit()
+        return "works"
+
     if request.method == "DELETE":
         access = Access.query.filter_by(access_id = access_id).first()
+        # todo: check who has access
+
         if access:
             db.session.delete(access)
             db.session.commit()
