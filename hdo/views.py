@@ -6,6 +6,7 @@ from hdo import db
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+import re
 
 @app.route('/')
 def hello_world():
@@ -56,11 +57,18 @@ def register():
         return render_template("register.html")
 
     if request.method == "POST":
+<<<<<<< HEAD
+        password = request.form["password"]
+        pattern = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])(?=.*[^\s])[A-Za-z\d@$!#%*?&]{8,}$")
+        if re.match(pattern, password) is None:
+            flash("Password does not meet minimum requirement of 8 Characters long, with one capital letter, one lowercase letter, one digit and one special character.", "danger")
+=======
         email = request.form["email"]
         user = Users.query.filter_by(email=email).first()
 
         if user:
             flash("Unfortunately, " + user.email + " is already in use.", 'danger') #need to change to a red message
+>>>>>>> master
             return redirect(url_for("register"))
         hashed_password = generate_password_hash(request.form["password"], method='sha256')
         new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
@@ -78,7 +86,8 @@ def logout():
 def dashboard():
     if request.method == "GET":
         user_lists = Access.query.filter_by(user_id=current_user.id).all()
-        data = {"user_lists": user_lists}
+        modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
+        data = {"user_lists": user_lists, "modal": modal}
         return render_template("lists.html", data = data)
 
 @app.route("/list/<list_id>", methods=["GET"])
@@ -106,11 +115,12 @@ def api_task(list_id):
 
 
 
-@app.route("/api/list/add", methods=["POST"])
-def api_list():
+@app.route("/api/list/<list_id>", methods=["POST", "DELETE"])
+def api_list(list_id):
+
     if request.method == "POST":
         list_name = request.form["list_name"]
-        new_list = Lists(list_name = list_name, list_owner_id= current_user.id)
+        new_list = Lists(list_name = list_name, list_owner_id = current_user.id)
         db.session.add(new_list)
         db.session.flush()
         db.session.refresh(new_list)
@@ -121,6 +131,17 @@ def api_list():
         flash(list_name + " was added", "success")
         return redirect(url_for("dashboard"))
 
+    if request.method == "DELETE":
+        # TODO: check to see if user is the owner of the list
+        list = Lists.query.filter_by(list_id = list_id).first()
+        list_name = list.list_name
+        db.session.delete(list)
+        db.session.commit()
+        flash(list_name + " was deleted!", "success")
+        return "list deleted"
+        # TODO: check is deleting list will delete multiple items on the access table
+        # todo: Do we also need to delete the task for this list?  How do we want to do that? SQLAlchemy Cascades
+
 @app.route("/api/lists/get", methods=["GET"])
 def api_get_lists():
     if request.method == "GET":
@@ -130,6 +151,28 @@ def api_get_lists():
             print(list.list_owner.email)
         return "test"
 
+<<<<<<< HEAD
+@app.route("/api/access/<access_id>", methods=["GET", "POST", "DELETE"])
+def api_access(access_id):
+    if request.method == "POST":
+        user_id = request.args["user_id"]
+        list_id = request.args["list_id"]
+        new_access = Access(list_id = list_id, user_id = user_id)
+        db.session.add(new_access)
+        db.session.commit()
+        return "works"
+
+    if request.method == "DELETE":
+        access = Access.query.filter_by(access_id = access_id).first()
+        # todo: check who has access
+
+        if access:
+            db.session.delete(access)
+            db.session.commit()
+            return "Access Deleted"
+        else:
+            return "Access Item Not Found", 404
+=======
 @app.route("/api/<list_id>/task/<task_id>/delete", methods=["POST"])
 def api_delete_task(list_id, task_id):
     if request.method == "POST":
@@ -153,3 +196,4 @@ def api_update_state(list_id, task_id):
         db.session.commit()
         flash(task_name + " was updated", "success")
         return redirect(url_for("list_display", list_id = list_id))
+>>>>>>> master

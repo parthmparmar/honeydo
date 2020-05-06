@@ -3,13 +3,20 @@
 
 <div class="container">
   {% include "base/alerts.html" %}
+  {% include "base/modal-yes-no.html" %}
   <div class="lists-view">
     <p>Lists:</p>
-    {% for list in data.user_lists %}
-      <p><a href="/list/{{list.list.list_id}}">{{list.list.list_name}}</a></p>
-    {% endfor %}
+    <ul class="list-group">
+      {% for list in data.user_lists %}
+        <li class="list-group-item" >
+          <a href="/list/{{list.list.list_id}}">{{list.list.list_name}}</a>
+          <button type="button" data-list_id = {{list.list.list_id}} class="btn btn-secondary delete_list float-right">Delete</button>
+        </li>
+      {% endfor %}
+    </ul>
+
   </div>
-  <div class="list-add-div">
+  <div class="list-add-div mt-4">
     <form class="add-list" action="/api/list/add" method="POST">
       <div class="input-group mb-3">
         <div class="input-group-prepend">
