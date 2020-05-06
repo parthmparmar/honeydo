@@ -57,18 +57,17 @@ def register():
         return render_template("register.html")
 
     if request.method == "POST":
-<<<<<<< HEAD
         password = request.form["password"]
         pattern = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])(?=.*[^\s])[A-Za-z\d@$!#%*?&]{8,}$")
         if re.match(pattern, password) is None:
             flash("Password does not meet minimum requirement of 8 Characters long, with one capital letter, one lowercase letter, one digit and one special character.", "danger")
-=======
+
         email = request.form["email"]
         user = Users.query.filter_by(email=email).first()
 
         if user:
             flash("Unfortunately, " + user.email + " is already in use.", 'danger') #need to change to a red message
->>>>>>> master
+
             return redirect(url_for("register"))
         hashed_password = generate_password_hash(request.form["password"], method='sha256')
         new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
@@ -151,7 +150,7 @@ def api_get_lists():
             print(list.list_owner.email)
         return "test"
 
-<<<<<<< HEAD
+
 @app.route("/api/access/<access_id>", methods=["GET", "POST", "DELETE"])
 def api_access(access_id):
     if request.method == "POST":
@@ -172,7 +171,7 @@ def api_access(access_id):
             return "Access Deleted"
         else:
             return "Access Item Not Found", 404
-=======
+
 @app.route("/api/<list_id>/task/<task_id>/delete", methods=["POST"])
 def api_delete_task(list_id, task_id):
     if request.method == "POST":
@@ -196,4 +195,3 @@ def api_update_state(list_id, task_id):
         db.session.commit()
         flash(task_name + " was updated", "success")
         return redirect(url_for("list_display", list_id = list_id))
->>>>>>> master
