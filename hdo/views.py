@@ -8,6 +8,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import re
 from hdo.utilities.db_functions import is_owner, has_access
+from sqlalchemy.sql import text
+from sqlalchemy import create_engine
+engine = create_engine('postgresql://postgres:2123@localhost/honeydo')
 
 @app.route('/')
 def hello_world():
@@ -84,24 +87,46 @@ def list_display(list_id):
                 tasks = Tasks.query.filter_by(list_id=list_id).all()
                 task_data = {"tasks": tasks}
                 users = Access.query.filter_by(list_id=list_id).all()
-                return render_template("tasks.html", list = list, task_data = task_data, list_id = list_id, current_user = current_user, users = users)
+
+                all_tasks = Tasks.query.order_by(Tasks.task_id).filter_by(list_id=list_id).all()
+                with engine.connect() as con:
+                    complete_tasks = con.execute(
+                    """SELECT u.name, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
+                    FROM public."Users" u
+                    JOIN public."Tasks" t
+                    ON u.id = t.task_owner_id
+                    WHERE t.list_id = %s
+                   	GROUP BY u.name
+                    ORDER BY points desc""", (list_id))
+                list = Lists.query.filter_by(list_id=list_id).first()
+                task_data = {"tasks": all_tasks}
+                scoreboard_data = {"sb_data": complete_tasks}
+                modal = {"title": "Confirm", "msg": "Are you sure you want to delete the task?"}
+                data = {"all_tasks": all_tasks, "modal": modal}
+
+                return render_template("tasks.html", list = list, task_data = task_data, list_id = list_id, current_user = current_user, users = users, data=data, scoreboard_data=scoreboard_data)
             else:
                 flash("You don't have access to this list, please contact owner to get access", "warning")
                 return redirect(url_for("dashboard"))
         else:
             return "404 Error" #replace with 404 page
 
+        #return render_template("tasks.html", list = list, task_data = task_data, list_id = list_id, scoreboard_data = scoreboard_data, data=data)
+
+        #list = Lists.query.filter_by(list_id = list_id).first()
+        #return list.list_name + " -- " + list.list_owner.email
+
 @app.route("/api/task/<list_id>/add", methods=["POST"])
 def api_task(list_id):
     if request.method == "POST":
         task_name = request.form["task_name"]
-        due_date = request.form["due_date"]
-        points = request.form["points"]
-        new_task = Tasks(list_id = list_id, task_name = task_name, task_owner_id = current_user.id, due_date = due_date, state = 1, points=points)
+        due_date = request.form["due_date"] or None
+        points = request.form["points"] or 0
+        new_task = Tasks(list_id=list_id, task_name=task_name, task_owner_id=current_user.id, due_date=due_date, state=0, points=points)
         db.session.add(new_task)
         db.session.commit()
-        flash(task_name + " was added", "success")
-        return redirect(url_for("list_display", list_id = list_id))
+        #flash(task_name + " was added", "success")
+        return redirect(url_for("list_display", list_id=list_id))
 
 
 
@@ -185,16 +210,16 @@ def api_access():
         else:
             return "Access Item Not Found", 404
 
-@app.route("/api/<list_id>/task/<task_id>/delete", methods=["POST"])
+@app.route("/api/<list_id>/task/<task_id>/delete", methods=["DELETE"])
 def api_delete_task(list_id, task_id):
-    if request.method == "POST":
+    if request.method == "DELETE":
         task_to_delete = Tasks.query.filter_by(task_id=task_id).first()
         task_name = task_to_delete.task_name
         db.session.delete(task_to_delete)
-        db.session.flush()
         db.session.commit()
-        flash(task_name + " was deleted", "success")
-        return redirect(url_for("list_display", list_id = list_id))
+        flash(task_name + " was deleted", "danger")
+        return "task deleted"
+        #return redirect(url_for("list_display", list_id = list_id))
 
 @app.route("/api/<list_id>/task/<task_id>/update_state", methods=["POST"])
 def api_update_state(list_id, task_id):
@@ -202,9 +227,30 @@ def api_update_state(list_id, task_id):
 
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
         task_name = task_to_update.task_name
-        task_to_update.state = 0
+        if task_to_update.state == 1:
+            task_to_update.state = 0
+        elif task_to_update.state == 0:
+            task_to_update.state = 1
+        else:
+            task_to_update.state = 0
         #db.session.update(task_to_update) #wrong method
         db.session.flush()
         db.session.commit()
-        flash(task_name + " was updated", "success")
-        return redirect(url_for("list_display", list_id = list_id))
+        #flash(task_name + " was updated", "success")
+        #return redirect(url_for("list_display", list_id = list_id))
+        return "task updated"
+
+'''@app.route("/api/task/<task_id>/update_points", methods=["POST"])
+def api_update_state(list_id, task_id):
+    if request.method == "POST":
+
+        task_to_update = Tasks.query.filter_by(task_id=task_id).first()
+        new_points = request.form["list_name"]
+        task_to_update.points = new_points
+
+        #db.session.update(task_to_update) #wrong method
+        db.session.flush()
+        db.session.commit()
+        #flash(task_name + " was updated", "success")
+        #return redirect(url_for("list_display", list_id = list_id))
+        return "task updated"'''
