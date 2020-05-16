@@ -34,7 +34,7 @@ class Lists(db.Model):  #accessing Model class of SQLAlchemy
 	list_owner_id=db.Column(db.Integer, db.ForeignKey("Users.id"), nullable=False)
 	list_owner=db.relationship("Users", foreign_keys = [list_owner_id], lazy=True)
 	list_access = db.relationship("Access", cascade="all, delete-orphan")
-	# TODO -- add relationship to Tasks so they get deleted
+	list_tasks = db.relationship("Tasks", cascade="all, delete-orphan")
 
 
 	'''def __init__(self,list_id,list_name,list_owner):

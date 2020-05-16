@@ -2,14 +2,36 @@
 {% block body %}
 
 
+<div class="container">
+  {% include "base/alerts.html" %}
+  {% include "base/modal-yes-no.html" %}
+  <div class="lists-view">
+    <h1>{{ list.list_name }} <span>
+      {% if current_user.id == list.list_owner_id %}
+      <button type="button" class="btn btn-primary edit-list">Edit</button>
+      {% endif %}
+    </span></h1>
+    <div class="input-group mb-3 d-none edit-list-input">
+      <input id="new_name" type="text" class="form-control" value="{{list.list_name}}">
+      <div class="input-group-append">
+        <button data-list_id = {{list.list_id}} id="update-list-name" class="btn btn-outline-secondary" type="button">Update</button>
+      </div>
+    </div>
+    {% include "/access.html" %}
+
+  </div>
+
+  <br>
+
+
+
 <table>
     <tr>
         <td>
             <div class="container" width="100">
-                {% include "base/alerts.html" %}
-                {% include "base/modal-yes-no.html" %}
+
                 <div class="lists-view">
-                    <h1>{{ list.list_name }}</h1>
+
                     {% for tasks in task_data.tasks %}
                     <div class="list-group">
                         <a href="#" class="list-group-item list-group-item-action active">
@@ -94,7 +116,9 @@
     </tr>
 </table>
 
+
 {% endblock %}
 {% block javascript %}
+<script type="text/javascript" src="{{ url_for('static', filename='script/tasks_page.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
 {% endblock %}

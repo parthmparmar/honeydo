@@ -1,0 +1,39 @@
+<!-- Access -->
+<div class="accordion" id="list-access">
+  <div class="card">
+    <div class="card-header" id="access-heading">
+      <h2 class="mb-0">
+        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#access-card" aria-expanded="true" aria-controls="access-card">
+          Users
+        </button>
+      </h2>
+    </div>
+
+    <div id="access-card" class="collapse show" aria-labelledby="access-card" data-parent="#list-access">
+      <div class="card-body">
+        <ul class="list-group list-group-horizontal-md">
+          {% for user in users %}
+          <li class="list-group-item">{{user.user.name}}
+            {% if current_user.id == list.list_owner_id %}
+              {% if user.user.id != list.list_owner_id %}
+                <button class="btn btn-danger delete-user-access" data-list_id = {{list.list_id}} data-user_id = {{user.user.id}} role="button">Delete</button>
+                {% endif %}
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+
+        {% if current_user.id == list.list_owner_id %}
+        <form class="form-group mt-4" action="/api/access/?list_id={{list.list_id}}" method="POST">
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <button class="btn btn-outline-secondary" type="submit" id="add-user">Add User</button>
+            </div>
+            <input name="user_email" type="email" class="form-control" placeholder="user email" aria-label="Add User" aria-describedby="add-user" required>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

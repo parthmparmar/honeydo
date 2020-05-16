@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, flash
+from flask import Flask, redirect, url_for, render_template, request, flash, abort
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
@@ -7,6 +7,7 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import re
+from hdo.utilities.db_functions import is_owner, has_access
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 engine = create_engine('postgresql://postgres:2123@localhost/honeydo')
@@ -35,24 +36,9 @@ def login():
                 flash("Welcome Back " + user.name, "success")
                 return redirect(url_for("dashboard"))
 
-        return "Invalid Username or Password"
+        flash("email and/or password incorrect, please try again." "warning")
+        return redirect(url_for("login"))
 
-
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     form = LoginForm()
-#
-#     if form.validate_on_submit():
-#         #return '<h1>' + form.email.data + ' ' + form.password.data + '</h1>'
-#         user = Users.query.filter_by(email=form.email.data).first()
-#         if user:
-#             if check_password_hash(user.hash_password, form.password.data):#user.hash_password == form.password.data:
-#                 login_user(user)
-#                 return render_template('lists.html') #will need to change to redirect when route is set up
-#
-#         return 'Invalid username or password'
-#
-#     return render_template('login.html', form=form)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -69,8 +55,7 @@ def register():
         user = Users.query.filter_by(email=email).first()
 
         if user:
-            flash("Unfortunately, " + user.email + " is already in use.", 'danger') #need to change to a red message
-
+            flash("Unfortunately, " + user.email + " is already in use.", 'danger')
             return redirect(url_for("register"))
         hashed_password = generate_password_hash(request.form["password"], method='sha256')
         new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
@@ -82,35 +67,51 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return 'You are now logged out'
+    flash("You are now logged out", "success")
+    return redirect(url_for("login"))
 
 @app.route("/lists", methods=["GET"])
 def dashboard():
     if request.method == "GET":
         user_lists = Access.query.filter_by(user_id=current_user.id).all()
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
-        data = {"user_lists": user_lists, "modal": modal}
+        data = {"user_lists": user_lists, "modal": modal, "user": current_user}
         return render_template("lists.html", data = data)
 
 @app.route("/list/<list_id>", methods=["GET"])
 def list_display(list_id):
     if request.method == "GET":
-        all_tasks = Tasks.query.order_by(Tasks.task_id).filter_by(list_id=list_id).all()
-        with engine.connect() as con:
-            complete_tasks = con.execute(
-            """SELECT u.name, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
-            FROM public."Users" u
-            JOIN public."Tasks" t
-            ON u.id = t.task_owner_id
-            WHERE t.list_id = %s
-           	GROUP BY u.name
-            ORDER BY points desc""", (list_id))
         list = Lists.query.filter_by(list_id=list_id).first()
-        task_data = {"tasks": all_tasks}
-        scoreboard_data = {"sb_data": complete_tasks}
-        modal = {"title": "Confirm", "msg": "Are you sure you want to delete the task?"}
-        data = {"all_tasks": all_tasks, "modal": modal}
-        return render_template("tasks.html", list = list, task_data = task_data, list_id = list_id, scoreboard_data = scoreboard_data, data=data)
+        if list:
+            if has_access(current_user.id, list_id):
+                tasks = Tasks.query.filter_by(list_id=list_id).all()
+                task_data = {"tasks": tasks}
+                users = Access.query.filter_by(list_id=list_id).all()
+
+                all_tasks = Tasks.query.order_by(Tasks.task_id).filter_by(list_id=list_id).all()
+                with engine.connect() as con:
+                    complete_tasks = con.execute(
+                    """SELECT u.name, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
+                    FROM public."Users" u
+                    JOIN public."Tasks" t
+                    ON u.id = t.task_owner_id
+                    WHERE t.list_id = %s
+                   	GROUP BY u.name
+                    ORDER BY points desc""", (list_id))
+                list = Lists.query.filter_by(list_id=list_id).first()
+                task_data = {"tasks": all_tasks}
+                scoreboard_data = {"sb_data": complete_tasks}
+                modal = {"title": "Confirm", "msg": "Are you sure you want to delete the task?"}
+                data = {"all_tasks": all_tasks, "modal": modal}
+
+                return render_template("tasks.html", list = list, task_data = task_data, list_id = list_id, current_user = current_user, users = users, data=data, scoreboard_data=scoreboard_data)
+            else:
+                flash("You don't have access to this list, please contact owner to get access", "warning")
+                return redirect(url_for("dashboard"))
+        else:
+            return "404 Error" #replace with 404 page
+
+        #return render_template("tasks.html", list = list, task_data = task_data, list_id = list_id, scoreboard_data = scoreboard_data, data=data)
 
         #list = Lists.query.filter_by(list_id = list_id).first()
         #return list.list_name + " -- " + list.list_owner.email
@@ -129,7 +130,7 @@ def api_task(list_id):
 
 
 
-@app.route("/api/list/<list_id>", methods=["POST", "DELETE"])
+@app.route("/api/list/<list_id>", methods=["POST", "DELETE", "PUT"])
 def api_list(list_id):
 
     if request.method == "POST":
@@ -153,37 +154,59 @@ def api_list(list_id):
         db.session.commit()
         flash(list_name + " was deleted!", "success")
         return "list deleted"
-        # TODO: check is deleting list will delete multiple items on the access table
-        # todo: Do we also need to delete the task for this list?  How do we want to do that? SQLAlchemy Cascades
 
-@app.route("/api/lists/get", methods=["GET"])
-def api_get_lists():
-    if request.method == "GET":
-        lists = Lists.query.all()
-        print(lists)
-        for list in lists:
-            print(list.list_owner.email)
-        return "test"
+    # update list name
+    # AJAX calls
+    if request.method == "PUT":
+        if is_owner(current_user.id, list_id):
+            list = Lists.query.filter_by(list_id = list_id).first()
+            list.list_name = request.form["new_name"]
+            db.session.commit()
+            return "list updated"
+        else:
+            flash("You are not the owner of the list, please ask the owner to change the name", "danger")
+            return "not allowed", 401
 
+@app.route("/api/access/", methods=["GET", "POST", "DELETE"])
+def api_access():
+    list_id = request.args["list_id"]
 
-@app.route("/api/access/<access_id>", methods=["GET", "POST", "DELETE"])
-def api_access(access_id):
+# Give Access
     if request.method == "POST":
+        user_email=request.form["user_email"]
+        user = Users.query.filter_by(email=user_email).first()
+        if not user:
+            flash ("User does not exist, please check email and try again.", "warning")
+            return redirect(url_for("list_display", list_id = list_id))
+
+        user_id = user.id
+        if is_owner(current_user.id, list_id):
+            new_access = Access(list_id = list_id, user_id = user_id)
+            db.session.add(new_access)
+            db.session.commit()
+            flash("Access given to " + user.name, "success")
+            return redirect(url_for("list_display", list_id = list_id))
+        else:
+            flash("You are not the owner of this list, please ask ower to give access", "warning")
+            return redirect(url_for("list_display", list_id = list_id))
+
+# Access Delete
+# AJAX Call
+    if request.method == "DELETE":
+
         user_id = request.args["user_id"]
         list_id = request.args["list_id"]
-        new_access = Access(list_id = list_id, user_id = user_id)
-        db.session.add(new_access)
-        db.session.commit()
-        return "works"
-
-    if request.method == "DELETE":
-        access = Access.query.filter_by(access_id = access_id).first()
-        # todo: check who has access
+        access = Access.query.filter_by(user_id = user_id, list_id = list_id).first()
 
         if access:
-            db.session.delete(access)
-            db.session.commit()
-            return "Access Deleted"
+            if is_owner(current_user.id, list_id):
+                db.session.delete(access)
+                db.session.commit()
+                flash("User removed for list", "success")
+                return "Access Deleted"
+            else:
+                flash("You are not the owner of the list, please ask owner to delete user." , "danger")
+                return "Not Owner of List", 404
         else:
             return "Access Item Not Found", 404
 
