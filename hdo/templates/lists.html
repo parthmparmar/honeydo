@@ -2,15 +2,18 @@
 {% block body %}
 
 <div class="container">
+  <h3>Hello {{data.user.name}}!</h3>
   {% include "base/alerts.html" %}
   {% include "base/modal-yes-no.html" %}
   <div class="lists-view">
-    <p>Lists:</p>
+    <p>Your Lists:</p>
     <ul class="list-group">
       {% for list in data.user_lists %}
         <li class="list-group-item" >
           <a href="/list/{{list.list.list_id}}">{{list.list.list_name}}</a>
+          {% if data.user.id == list.list.list_owner_id %}
           <button type="button" data-list_id = {{list.list.list_id}} class="btn btn-secondary delete_list float-right">Delete</button>
+          {% endif %}
         </li>
       {% endfor %}
     </ul>
