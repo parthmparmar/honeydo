@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, flash, abort
+from flask import Flask, redirect, url_for, render_template, request, flash, abort, jsonify
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
@@ -91,12 +91,14 @@ def list_display(list_id):
                 all_tasks = Tasks.query.order_by(Tasks.task_id).filter_by(list_id=list_id).all()
                 with engine.connect() as con:
                     complete_tasks = con.execute(
-                    """SELECT u.name, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
-                    FROM public."Users" u
+                    """SELECT a.user_id, u.name, SUM (CASE WHEN a.user_id = t.completed_by_id THEN t.points ELSE 0 END) AS points
+                    FROM public."Access" a
                     JOIN public."Tasks" t
-                    ON u.id = t.task_owner_id
-                    WHERE t.list_id = %s
-                   	GROUP BY u.name
+                    ON a.list_id = t.list_id
+                    JOIN public."Users" u
+                    ON a.user_id = u.id
+                    WHERE a.list_id = 11
+                    GROUP BY a.user_id, u.name
                     ORDER BY points desc""", (list_id))
                 list = Lists.query.filter_by(list_id=list_id).first()
                 task_data = {"tasks": all_tasks}
@@ -229,8 +231,10 @@ def api_update_state(list_id, task_id):
         task_name = task_to_update.task_name
         if task_to_update.state == 1:
             task_to_update.state = 0
+            task_to_update.completed_by_id = None
         elif task_to_update.state == 0:
             task_to_update.state = 1
+            task_to_update.completed_by_id = current_user.id
         else:
             task_to_update.state = 0
         #db.session.update(task_to_update) #wrong method
@@ -254,3 +258,32 @@ def api_update_state(list_id, task_id):
         #flash(task_name + " was updated", "success")
         #return redirect(url_for("list_display", list_id = list_id))
         return "task updated"'''
+
+
+
+@app.route("/api/score/<list_id>")
+def get_score(list_id):
+    with engine.connect() as con:
+        complete_tasks = con.execute(
+        """SELECT u.name, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
+            FROM public."Users" u
+            JOIN public."Tasks" t
+            ON u.id = t.task_owner_id
+            WHERE t.list_id = %s
+            GROUP BY u.name
+            ORDER BY points desc""", (list_id))
+
+# SELECT t.completed_by_id, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
+# FROM public."Access" a
+# JOIN public."Tasks" t
+# ON a.user_id = t.completed_by_id
+# WHERE a.list_id = 11
+# GROUP BY t.completed_by_id
+
+# SELECT a.user_id, SUM (CASE WHEN a.user_id = t.completed_by_id THEN t.points ELSE 0 END) AS points
+# FROM public."Access" a
+# JOIN public."Tasks" t
+# ON a.list_id = t.list_id
+# WHERE a.list_id = 11
+# GROUP BY a.user_id
+# ORDER BY points desc

@@ -9,16 +9,17 @@
       </h2>
     </div>
 
-    <div id="access-card" class="collapse show" aria-labelledby="access-card" data-parent="#list-access">
+    <div id="access-card" class="collapse" aria-labelledby="access-card" data-parent="#list-access">
       <div class="card-body">
         <ul class="list-group list-group-horizontal-md">
-          {% for user in users %}
-          <li class="list-group-item">{{user.user.name}}
+          {% for user in scoreboard_data.sb_data %}
+          <li class="list-group-item">{{user.name}}
             {% if current_user.id == list.list_owner_id %}
-              {% if user.user.id != list.list_owner_id %}
-                <button class="btn btn-danger delete-user-access" data-list_id = {{list.list_id}} data-user_id = {{user.user.id}} role="button">Delete</button>
+              {% if user.user_id != list.list_owner_id %}
+                <button class="btn btn-danger delete-user-access" data-list_id = {{list.list_id}} data-user_id = {{user.user_id}} role="button">Delete</button>
                 {% endif %}
             {% endif %}
+              <span data-name={{user.user_id}} class="score badge badge-primary badge-pill">{{user.points}}</span>
           </li>
           {% endfor %}
         </ul>
