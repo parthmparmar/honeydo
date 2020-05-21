@@ -97,7 +97,7 @@ def list_display(list_id):
                     ON a.list_id = t.list_id
                     JOIN public."Users" u
                     ON a.user_id = u.id
-                    WHERE a.list_id = 11
+                    WHERE a.list_id = %s
                     GROUP BY a.user_id, u.name
                     ORDER BY points desc""", (list_id))
                 list = Lists.query.filter_by(list_id=list_id).first()
@@ -183,11 +183,15 @@ def api_access():
 
         user_id = user.id
         if is_owner(current_user.id, list_id):
-            new_access = Access(list_id = list_id, user_id = user_id)
-            db.session.add(new_access)
-            db.session.commit()
-            flash("Access given to " + user.name, "success")
-            return redirect(url_for("list_display", list_id = list_id))
+            if has_access(user_id, list_id):
+                flash("User already has access to this list", "warning")
+                return redirect(url_for("list_display", list_id = list_id))
+            else:
+                new_access = Access(list_id = list_id, user_id = user_id)
+                db.session.add(new_access)
+                db.session.commit()
+                flash("Access given to " + user.name, "success")
+                return redirect(url_for("list_display", list_id = list_id))
         else:
             flash("You are not the owner of this list, please ask ower to give access", "warning")
             return redirect(url_for("list_display", list_id = list_id))
@@ -206,9 +210,14 @@ def api_access():
                 db.session.commit()
                 flash("User removed for list", "success")
                 return "Access Deleted"
+            elif int(user_id) == current_user.id:
+                db.session.delete(access)
+                db.session.commit()
+                flash("You were removed for list", "success")
+                return "Self Deleted"
             else:
                 flash("You are not the owner of the list, please ask owner to delete user." , "danger")
-                return "Not Owner of List", 404
+                return "Not Owner of List"
         else:
             return "Access Item Not Found", 404
 
@@ -258,32 +267,3 @@ def api_update_state(list_id, task_id):
         #flash(task_name + " was updated", "success")
         #return redirect(url_for("list_display", list_id = list_id))
         return "task updated"'''
-
-
-
-@app.route("/api/score/<list_id>")
-def get_score(list_id):
-    with engine.connect() as con:
-        complete_tasks = con.execute(
-        """SELECT u.name, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
-            FROM public."Users" u
-            JOIN public."Tasks" t
-            ON u.id = t.task_owner_id
-            WHERE t.list_id = %s
-            GROUP BY u.name
-            ORDER BY points desc""", (list_id))
-
-# SELECT t.completed_by_id, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
-# FROM public."Access" a
-# JOIN public."Tasks" t
-# ON a.user_id = t.completed_by_id
-# WHERE a.list_id = 11
-# GROUP BY t.completed_by_id
-
-# SELECT a.user_id, SUM (CASE WHEN a.user_id = t.completed_by_id THEN t.points ELSE 0 END) AS points
-# FROM public."Access" a
-# JOIN public."Tasks" t
-# ON a.list_id = t.list_id
-# WHERE a.list_id = 11
-# GROUP BY a.user_id
-# ORDER BY points desc

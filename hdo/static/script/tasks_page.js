@@ -1,4 +1,4 @@
-console.log("js loding")
+
 $(".delete-user-access").on("click", function () {
   user_id = $(this).data("user_id");
   list_id = $(this).data("list_id");
@@ -6,12 +6,19 @@ $(".delete-user-access").on("click", function () {
     url:"/api/access/?list_id="+list_id+"&user_id="+user_id,
     method: "DELETE",
   }).done(function (resp) {
+    console.log(resp)
+    if (resp == "Self Deleted"){
+      location.href = "/lists";
+    }
+    else{
       location.reload();
+    }
   });
 });
 
 $(".edit-list").on("click", function () {
   $(".edit-list-input").removeClass("d-none");
+  $(".list-title").addClass("d-none");
 });
 
 $("#update-list-name").on("click", function (){

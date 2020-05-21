@@ -4,22 +4,24 @@
     <div class="card-header" id="access-heading">
       <h2 class="mb-0">
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#access-card" aria-expanded="true" aria-controls="access-card">
-          Users
+          <i class="fas fa-users-cog fa-2x"></i>
         </button>
       </h2>
     </div>
 
     <div id="access-card" class="collapse" aria-labelledby="access-card" data-parent="#list-access">
       <div class="card-body">
-        <ul class="list-group list-group-horizontal-md">
+        <ul class="list-group list-group-horizontal-md list-group-flush">
           {% for user in scoreboard_data.sb_data %}
-          <li class="list-group-item">{{user.name}}
+          <li class="list-group-item border-0">
             {% if current_user.id == list.list_owner_id %}
               {% if user.user_id != list.list_owner_id %}
-                <button class="btn btn-danger delete-user-access" data-list_id = {{list.list_id}} data-user_id = {{user.user_id}} role="button">Delete</button>
+                <button class="btn btn-danger btn-sm delete-user-access allign-middle" data-list_id = {{list.list_id}} data-user_id = {{user.user_id}} role="button"><i class="fas fa-user-slash"></i></button>
                 {% endif %}
+            {% elif current_user.id == user.user_id %}
+                <button class="btn btn-danger btn-sm delete-user-access allign-middle" data-list_id = {{list.list_id}} data-user_id = {{user.user_id}} role="button"><i class="fas fa-user-slash"></i></button>
             {% endif %}
-              <span data-name={{user.user_id}} class="score badge badge-primary badge-pill">{{user.points}}</span>
+              <span class="user-name align-middle">{{user.name}}</span> <span data-name={{user.user_id}} class="score badge badge-primary badge-pill">{{user.points}}</span>
           </li>
           {% endfor %}
         </ul>
@@ -28,9 +30,9 @@
         <form class="form-group mt-4" action="/api/access/?list_id={{list.list_id}}" method="POST">
           <div class="input-group mb-3">
             <div class="input-group-prepend">
-              <button class="btn btn-outline-secondary" type="submit" id="add-user">Add User</button>
+              <button class="btn btn-outline-secondary" type="submit" id="add-user"><i class="fas fa-user-plus"></i></button>
             </div>
-            <input name="user_email" type="email" class="form-control" placeholder="user email" aria-label="Add User" aria-describedby="add-user" required>
+            <input name="user_email" type="email" class="form-control" placeholder="User Email" aria-label="Add User" aria-describedby="add-user" required>
           </div>
         </form>
         {% endif %}

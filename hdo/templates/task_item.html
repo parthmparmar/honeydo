@@ -1,0 +1,28 @@
+<div class="d-flex align-items-center p-2 border-bottom">
+  <div class="d-flex col-9 align-items-center">
+    <div class="check-circle">
+      <button class="toggle_task btn {{"d-none" if task.state == 0 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-check-circle fa-lg" style="color:green"></i></button>
+      <button class="toggle_task btn {{"d-none" if task.state == 1 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-circle fa-lg"></i></button>
+    </div>
+    <div class="task ml-2 mr-2 {{ "completed" if task.state == 1 }}">
+      {{task.task_name}}
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center justify-content-end due-date col-3">
+    <div class="">
+      {{task.due_date if task.due_date}}
+    </div>
+
+    {% if task.points %}
+    <div class="badge badge-pill badge-primary ml-2">
+      {{task.points}}
+    </div>
+    {% endif %}
+    <div class="ml-2">
+      <button class="p-0 btn claim_task"><i class="fas fa-hand-paper"></i></button>
+      <button class="p-0 btn edit_task"><i class="fas fa-pencil-alt"></i></button>
+      <button class="p-0 btn delete_task" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="fas fa-backspace"></i></button>
+    </div>
+  </div>
+</div>

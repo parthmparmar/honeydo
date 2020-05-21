@@ -21,7 +21,6 @@ $(".delete_list").on("click", function() {
 $(".delete_task").on("click", function() {
   list_id = $(this).data("list_id");
   task_id = $(this).data("task_id");
-
   $('#yes-no-modal').modal('show')
 
   $("#yes-btn").on("click", function() {
