@@ -1,24 +1,16 @@
 {% extends "base/base_html.html" %}
 {% block body %}
 
+{% block custom_css %}
+<link rel="stylesheet" href="../static/css/lists_css.css">
+{% endblock %}
+
 <div class="container">
-  <h3>Hello {{data.user.name}}!</h3>
   {% include "base/alerts.html" %}
   {% include "base/modal-yes-no.html" %}
-  <div class="lists-view">
-    <p>Your Lists:</p>
-    <ul class="list-group">
-      {% for list in data.user_lists %}
-        <li class="list-group-item" >
-          <a href="/list/{{list.list.list_id}}">{{list.list.list_name}}</a>
-          {% if data.user.id == list.list.list_owner_id %}
-          <button type="button" data-list_id = {{list.list.list_id}} class="btn btn-secondary delete_list float-right">Delete</button>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
 
-  </div>
+  <h3 class="">Hello {{data.user.name}}!</h3>
+
   <div class="list-add-div mt-4">
     <form class="add-list" action="/api/list/add" method="POST">
       <div class="input-group mb-3">
@@ -29,8 +21,16 @@
       </div>
     </form>
   </div>
-</div>
 
+  <div class="lists-view">
+    <h5>Your Lists:</h5>
+    {% for list in data.user_lists %}
+      {% with list = list %}
+        {% include "components/list_item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}
 {% block javascript %}
 <script type="text/javascript" src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
