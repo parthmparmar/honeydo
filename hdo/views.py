@@ -7,7 +7,7 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import re
-from hdo.utilities.db_functions import is_owner, has_access
+from hdo.utilities.db_functions import is_owner, has_access, list_type
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 engine = create_engine('postgresql://postgres:2123@localhost/honeydo')
@@ -74,6 +74,7 @@ def logout():
 def dashboard():
     if request.method == "GET":
         user_lists = Access.query.filter_by(user_id=current_user.id).all()
+        user_lists = list_type(user_lists)
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
         data = {"user_lists": user_lists, "modal": modal, "user": current_user}
         return render_template("lists.html", data = data)
