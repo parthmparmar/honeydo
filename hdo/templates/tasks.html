@@ -1,121 +1,53 @@
 {% extends "base/base_html.html" %}
-{% block body %}
 
+{% block custom_css %}
+<link rel="stylesheet" href="../static/css/task_css.css">
+{% endblock %}
+
+{% block body %}
 
 <div class="container">
   {% include "base/alerts.html" %}
   {% include "base/modal-yes-no.html" %}
-  <div class="lists-view">
-    <h1>{{ list.list_name }} <span>
-      {% if current_user.id == list.list_owner_id %}
-      <button type="button" class="btn btn-primary edit-list">Edit</button>
-      {% endif %}
-    </span></h1>
+  <div class="lists-view mt-5 mb-3">
+    <h1 class="list-title">{{ list.list_name }} <span>
+        {% if current_user.id == list.list_owner_id %}
+        <button type="button" class="btn btn-small edit-list"><i class="fas fa-edit"></i></button>
+        {% endif %}
+      </span>
+    </h1>
     <div class="input-group mb-3 d-none edit-list-input">
-      <input id="new_name" type="text" class="form-control" value="{{list.list_name}}">
+      <input id="new_name" type="text" class="form-control edit-list-input" value="{{list.list_name}}">
       <div class="input-group-append">
-        <button data-list_id = {{list.list_id}} id="update-list-name" class="btn btn-outline-secondary" type="button">Update</button>
+        <button data-list_id={{list.list_id}} id="update-list-name" class="btn btn-outline-secondary" type="button">Update</button>
       </div>
     </div>
-    {% include "/access.html" %}
-
   </div>
-
+  {% include "/access.html" %}
   <br>
 
+  <div class="list-add-div">
+    <form class="add-task" action="/api/task/{{list_id}}/add" method="POST">
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <button class="btn btn-outline-success" type="submit"><i class="fas fa-plus"></i></button>
+        </div>
+        <input name="task_name" type="text" class="form-control" placeholder="Add a new task" required />
+        <input name="points" type="number" class="form-control" placeholder="Point Value" />
+        <input name="due_date" type="date" class="form-control" placeholder="Due Date" />
+      </div>
+    </form>
+  </div>
 
+  <div class="task-view">
+    {% for tasks in task_data.tasks %}
+      {% with task=tasks %}
+        {% include "/task_item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
 
-<table>
-    <tr>
-        <td>
-            <div class="container" width="100">
-
-                <div class="lists-view">
-
-                    {% for tasks in task_data.tasks %}
-                    <div class="list-group">
-                        <a href="#" class="list-group-item list-group-item-action active">
-                            <div class="d-flex w-100 justify-content-between">
-                                <div> <!-- id="task_info{{tasks.task_id}}"> -->
-                                    <h5 class="mb-1">{{ tasks.task_name }}</h5>
-                                    <small> {% if tasks.state == 1 %} Complete {% else %} Incomplete {% endif %} </small>
-                                </div>
-                                <div class = "float-right">
-
-
-                                    <small id="points-display">Points: {{tasks.points}}</small> <button class="points-edit">e</button>
-
-                                    <form id="points-form" class="edit-points d-none">
-                                        <div class="input-group mb-3">
-
-                                            <input name="new_point_value" type="text" class="form-control" placeholder={{tasks.points}} required />
-                                            <div class="input-group-prepend">
-                                                <button class="btn btn-outline-secondary update-points" data-task_id = {{tasks.task_id}} type="submit">Update</button>
-                                            </div>
-                                        </div>
-                                    </form>
-
-                                    <br>
-
-
-                                    <small>{% if tasks.due_date == None %} No Due Date {% else %} Due: {{tasks.due_date}} {% endif %}</small><br>
-                                    <table>
-                                        <tr>
-                                          <!--  <form action="/api/{{list.list_id}}/task/{{tasks.task_id}}/delete" method="POST">
-                                                <button type="submit" class="btn btn-danger btn-sm">DELETE</button> -->
-                                                <button type="button" data-task_id = {{tasks.task_id}} data-list_id = {{tasks.list_id}} class="btn btn-secondary delete_task float-right">DELETE</button>
-
-                                            <!--<form action="/api/{{list.list_id}}/task/{{tasks.task_id}}/update_state" method="POST">-->
-                                            <!--    <button type="submit" class="btn btn-success btn-sm">MARK COMPLETE</button> -->
-                                                <button type="button" data-task_id = {{tasks.task_id}} data-list_id = {{tasks.list_id}} class="btn btn-success toggle_task btn-sm">MARK COMPLETE</button>
-                                          <!--  </form> -->
-                                        </tr>
-                                    </table>
-                                    <!--<small><a action="/api/task/{{task_id}}/delete">DELETE</a></small>-->
-                                </div>
-                            </div>
-                        </a>
-                    </div><br>
-                    {% endfor %}
-                </div>
-
-                <br />
-                <div class="list-add-div">
-                    <form class="add-task" action="/api/task/{{list_id}}/add" method="POST">
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <button class="btn btn-outline-secondary" type="submit">Add</button>
-                            </div>
-                            <input name="task_name" type="text" class="form-control" placeholder="Add a new task" required />
-                            <input name="points" type="number" class="form-control" placeholder="Point Value"  />
-                            <input name="due_date" type="date" class="form-control" placeholder="Due Date"  />
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </td>
-        <td>
-            <p>
-                <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-                    Show Leaderboard
-                </a>
-            </p>
-            <div class="collapse" id="collapseExample">
-                <div class="card card-body">
-                    <ul class="list-group">
-                        {% for ct in scoreboard_data.sb_data %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ ct.name }}
-                            <span class="badge badge-primary badge-pill">{{ ct.points }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </td>
-    </tr>
-</table>
-
+</div>
 
 {% endblock %}
 {% block javascript %}
