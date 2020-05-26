@@ -1,4 +1,4 @@
-console.log("js loding")
+
 $(".delete-user-access").on("click", function () {
   user_id = $(this).data("user_id");
   list_id = $(this).data("list_id");
@@ -6,12 +6,19 @@ $(".delete-user-access").on("click", function () {
     url:"/api/access/?list_id="+list_id+"&user_id="+user_id,
     method: "DELETE",
   }).done(function (resp) {
+    console.log(resp)
+    if (resp == "Self Deleted"){
+      location.href = "/lists";
+    }
+    else{
       location.reload();
+    }
   });
 });
 
 $(".edit-list").on("click", function () {
   $(".edit-list-input").removeClass("d-none");
+  $(".list-title").addClass("d-none");
 });
 
 $("#update-list-name").on("click", function (){
@@ -68,7 +75,7 @@ $(".task_edit").on("click", function() {
   //var $current_task_name = decodeURIComponent($('.task_edit').data('task_name'))
   current_task_name = $(this).data('task_name');
   //strings are saved with "_" replacing spaces for now. This replaces the "_" with spaces before loading the value into the form
-  current_task_name = current_task_name.replace(/_/g," ") 
+  current_task_name = current_task_name.replace(/_/g," ")
   current_points = $(this).data('points');
   current_date = $(this).data('due_date');
 

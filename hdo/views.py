@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, flash, abort
+from flask import Flask, redirect, url_for, render_template, request, flash, abort, jsonify
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
@@ -7,7 +7,7 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import re
-from hdo.utilities.db_functions import is_owner, has_access
+from hdo.utilities.db_functions import is_owner, has_access, list_type
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 engine = create_engine('postgresql://postgres:2123@localhost/honeydo')
@@ -74,6 +74,7 @@ def logout():
 def dashboard():
     if request.method == "GET":
         user_lists = Access.query.filter_by(user_id=current_user.id).all()
+        user_lists = list_type(user_lists)
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
         data = {"user_lists": user_lists, "modal": modal, "user": current_user}
         return render_template("lists.html", data = data)
@@ -91,12 +92,14 @@ def list_display(list_id):
                 all_tasks = Tasks.query.order_by(Tasks.task_id).filter_by(list_id=list_id).all()
                 with engine.connect() as con:
                     complete_tasks = con.execute(
-                    """SELECT u.name, SUM(CASE WHEN t.state = 0 THEN 0 ELSE t.points END) AS points
-                    FROM public."Users" u
+                    """SELECT a.user_id, u.name, SUM (CASE WHEN a.user_id = t.completed_by_id THEN t.points ELSE 0 END) AS points
+                    FROM public."Access" a
                     JOIN public."Tasks" t
-                    ON u.id = t.task_owner_id
-                    WHERE t.list_id = %s
-                   	GROUP BY u.name
+                    ON a.list_id = t.list_id
+                    JOIN public."Users" u
+                    ON a.user_id = u.id
+                    WHERE a.list_id = %s
+                    GROUP BY a.user_id, u.name
                     ORDER BY points desc""", (list_id))
                 list = Lists.query.filter_by(list_id=list_id).first()
                 task_data = {"tasks": all_tasks}
@@ -182,11 +185,15 @@ def api_access():
 
         user_id = user.id
         if is_owner(current_user.id, list_id):
-            new_access = Access(list_id = list_id, user_id = user_id)
-            db.session.add(new_access)
-            db.session.commit()
-            flash("Access given to " + user.name, "success")
-            return redirect(url_for("list_display", list_id = list_id))
+            if has_access(user_id, list_id):
+                flash("User already has access to this list", "warning")
+                return redirect(url_for("list_display", list_id = list_id))
+            else:
+                new_access = Access(list_id = list_id, user_id = user_id)
+                db.session.add(new_access)
+                db.session.commit()
+                flash("Access given to " + user.name, "success")
+                return redirect(url_for("list_display", list_id = list_id))
         else:
             flash("You are not the owner of this list, please ask ower to give access", "warning")
             return redirect(url_for("list_display", list_id = list_id))
@@ -205,9 +212,14 @@ def api_access():
                 db.session.commit()
                 flash("User removed for list", "success")
                 return "Access Deleted"
+            elif int(user_id) == current_user.id:
+                db.session.delete(access)
+                db.session.commit()
+                flash("You were removed for list", "success")
+                return "Self Deleted"
             else:
                 flash("You are not the owner of the list, please ask owner to delete user." , "danger")
-                return "Not Owner of List", 404
+                return "Not Owner of List"
         else:
             return "Access Item Not Found", 404
 
@@ -230,8 +242,10 @@ def api_update_state(list_id, task_id):
         task_name = task_to_update.task_name
         if task_to_update.state == 1:
             task_to_update.state = 0
+            task_to_update.completed_by_id = None
         elif task_to_update.state == 0:
             task_to_update.state = 1
+            task_to_update.completed_by_id = current_user.id
         else:
             task_to_update.state = 0
         #db.session.update(task_to_update) #wrong method

@@ -15,3 +15,10 @@ def has_access(user_id, list_id):
         return True
     else:
         return False
+
+def list_type(lists):
+    for list in lists:
+        access = Access.query.filter_by(list_id = list.list_id).all()
+        list.num_users = len(access)
+
+    return lists

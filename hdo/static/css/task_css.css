@@ -1,0 +1,45 @@
+.completed {
+  text-decoration: line-through wavy gray;
+}
+
+.c-green {
+  color: green;
+}
+
+.c-yellow {
+  color: yellow;
+}
+
+.c-orange {
+  color: orange;
+}
+
+.task {
+  font-size: 20px;
+}
+
+.delete_task {
+  color:red;
+}
+
+.claim_task {
+  color: gray;
+}
+
+.task_edit {
+  color: gray;
+}
+
+/* move to correct css file */
+.user-name {
+  font-siz: 20px;
+}
+
+.edit-list-input {
+  font-size: 32px;
+}
+
+.task-view {
+  height: 500px;
+  overflow: scroll;
+}
