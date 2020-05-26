@@ -9,6 +9,7 @@
 <div class="container">
   {% include "base/alerts.html" %}
   {% include "base/modal-yes-no.html" %}
+  {% include "base/task-edit-modal.html" %}
   <div class="lists-view mt-5 mb-3">
     <h1 class="list-title">{{ list.list_name }} <span>
         {% if current_user.id == list.list_owner_id %}

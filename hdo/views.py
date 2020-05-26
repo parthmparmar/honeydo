@@ -123,6 +123,7 @@ def list_display(list_id):
 def api_task(list_id):
     if request.method == "POST":
         task_name = request.form["task_name"]
+        task_name = task_name.replace(" ", "_")
         due_date = request.form["due_date"] or None
         points = request.form["points"] or 0
         new_task = Tasks(list_id=list_id, task_name=task_name, task_owner_id=current_user.id, due_date=due_date, state=0, points=points)
@@ -233,9 +234,9 @@ def api_delete_task(list_id, task_id):
         return "task deleted"
         #return redirect(url_for("list_display", list_id = list_id))
 
-@app.route("/api/<list_id>/task/<task_id>/update_state", methods=["POST"])
+@app.route("/api/<list_id>/task/<task_id>/update_state", methods=["PUT"])
 def api_update_state(list_id, task_id):
-    if request.method == "POST":
+    if request.method == "PUT":
 
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
         task_name = task_to_update.task_name
@@ -254,17 +255,25 @@ def api_update_state(list_id, task_id):
         #return redirect(url_for("list_display", list_id = list_id))
         return "task updated"
 
-'''@app.route("/api/task/<task_id>/update_points", methods=["POST"])
-def api_update_state(list_id, task_id):
-    if request.method == "POST":
-
+@app.route("/api/task/<task_id>/update", methods=["PUT"])
+def api_update_task(task_id):
+    if request.method == "PUT":
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
-        new_points = request.form["list_name"]
+
+        task_name = request.form["task_name"]
+        task_name = task_name.replace(" ", "_")
+        print(task_name)
+        task_to_update.task_name = task_name
+
+        new_points = request.form["points"]
         task_to_update.points = new_points
+
+        new_date = request.form["due_date"]
+        task_to_update.due_date = new_date
 
         #db.session.update(task_to_update) #wrong method
         db.session.flush()
         db.session.commit()
         #flash(task_name + " was updated", "success")
-        #return redirect(url_for("list_display", list_id = list_id))
-        return "task updated"'''
+        return "task updated"
+        #redirect(url_for("list_display", list_id = list_id))
