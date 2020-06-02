@@ -3,6 +3,7 @@
 
 <div class="container">
   {% include "base/alerts.html" %}
+  <h3>Welcome Back! Please Login.</h3>
   <form action="/login" method="POST">
     <div class="form-group">
       <label for="email">Email address</label>
@@ -16,11 +17,13 @@
       <input name="remember-me" type="checkbox" class="form-check-input" id="remember-me">
       <label class="form-check-label" for="remember-me">Remember Me</label>
     </div>
-    <button type="submit" class="btn btn-info">Submit</button>
+    <button type="submit" class="btn btn-info">Login</button>
   </form>
+  <br>
+  <p>Don't have an account? <a href="{{url_for('register')}}">Register</a></p>
 </div>
 
 {% endblock %}
 {% block javascript %}
-  <script type="text/javascript" src="{{ url_for('static', filename='script/test.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='script/login.js') }}"></script>
 {% endblock %}

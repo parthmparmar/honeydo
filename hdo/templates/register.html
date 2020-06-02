@@ -1,8 +1,10 @@
 {% extends "base/base_html.html" %}
 {% block body %}
 
+
 <div class="container">
   {% include "base/alerts.html" %}
+  <h3>Register</h3>
   <form id="register" action="/register" method="POST">
     <div class="form-group">
       <label for="email">Email address</label>
@@ -22,6 +24,8 @@
     </div>
     <button type="submit" class="btn btn-info">Submit</button>
   </form>
+  <br>
+  <p>Already have an account? <a href="{{url_for('login')}}">Login</a></p>
 </div>
 
 {% endblock %}

@@ -75,19 +75,27 @@ $(".task_edit").on("click", function() {
   //var $current_task_name = decodeURIComponent($('.task_edit').data('task_name'))
   current_task_name = $(this).data('task_name');
   //strings are saved with "_" replacing spaces for now. This replaces the "_" with spaces before loading the value into the form
-  current_task_name = current_task_name.replace(/_/g," ")
   current_points = $(this).data('points');
   current_date = $(this).data('due_date');
 
   $('#task-edit-modal').modal('show')
+
   $('input[name="task_name"]').val(current_task_name);
   $('input[name="points"]').val(current_points);
-  $('input[name="due_date"]').val(current_date);
 
-  $("#submit-new-task").on("click", function() {
+  //if ($('input[name="due_date"]').val() == NULL){
+  //  $('input[name="due_date"]').val(" ");
+  //}
+  //else{
+    $('input[name="due_date"]').val(current_date);
+
+  //}
+
+  $("#submit-edited-task").on("click", function() {
     task_name = $("#new_task_name").val().trim()
     points = $("#new_points").val().trim()
     due_date = $("#new_due_date").val().trim()
+
     $.ajax({
       url:"/api/task/"+task_id+"/update",
       method: "PUT",

@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from hdo.models import Users, Lists, Access, Tasks
 from hdo import db
 import datetime
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import re
@@ -71,6 +72,7 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route("/lists", methods=["GET"])
+@login_required
 def dashboard():
     if request.method == "GET":
         user_lists = Access.query.filter_by(user_id=current_user.id).all()
@@ -80,6 +82,7 @@ def dashboard():
         return render_template("lists.html", data = data)
 
 @app.route("/list/<list_id>", methods=["GET"])
+@login_required
 def list_display(list_id):
     if request.method == "GET":
         list = Lists.query.filter_by(list_id=list_id).first()
@@ -123,10 +126,9 @@ def list_display(list_id):
 @app.route("/api/task/<list_id>/add", methods=["POST"])
 def api_task(list_id):
     if request.method == "POST":
-        task_name = request.form["task_name"]
-        task_name = task_name.replace(" ", "_")
-        due_date = request.form["due_date"] or None
-        points = request.form["points"] or 0
+        task_name = request.form["new_task_name"]
+        due_date = request.form["new_due_date"] or None
+        points = request.form["new_points"] or 0
         new_task = Tasks(list_id=list_id, task_name=task_name, task_owner_id=current_user.id, due_date=due_date, state=0, points=points)
         db.session.add(new_task)
         db.session.commit()
@@ -297,14 +299,12 @@ def api_update_task(task_id):
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
 
         task_name = request.form["task_name"]
-        task_name = task_name.replace(" ", "_")
-        print(task_name)
         task_to_update.task_name = task_name
 
         new_points = request.form["points"]
         task_to_update.points = new_points
 
-        new_date = request.form["due_date"]
+        new_date = request.form["due_date"] or None
         task_to_update.due_date = new_date
 
         #db.session.update(task_to_update) #wrong method
@@ -313,3 +313,34 @@ def api_update_task(task_id):
         #flash(task_name + " was updated", "success")
         return "task updated"
         #redirect(url_for("list_display", list_id = list_id))
+
+@app.route("/tasksummary")
+def tasksummary():
+    if request.method == "GET":
+        tasks_due_today = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
+        with engine.connect() as con:
+            tasks_overdue = con.execute(
+            """SELECT t.*, l.list_name
+            FROM public."Tasks" t
+            JOIN public."Lists" l
+            ON l.list_id = t.list_id
+            WHERE t.task_owner_id = %s
+            AND t.due_date < CURRENT_DATE
+            AND t.state = 0
+            ORDER BY t.due_date ASC""", (current_user.id))
+        #tasks_overdue = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
+            other_tasks = con.execute(
+            """SELECT t.*, l.list_name
+            FROM public."Tasks" t
+            JOIN public."Lists" l
+            ON l.list_id = t.list_id
+            WHERE t.task_owner_id = %s
+            AND t.due_date > CURRENT_DATE
+            --AND t.state = 0
+            ORDER BY t.due_date ASC""", (current_user.id))
+
+        #other_tasks = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
+        modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
+        data = {"tasks_due_today": tasks_due_today, "tasks_overdue": tasks_overdue, "other_tasks": other_tasks, "modal": modal}
+
+        return render_template("tasks_summary.html", data = data)
