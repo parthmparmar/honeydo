@@ -281,8 +281,16 @@ def api_update_task(task_id):
 @app.route("/tasksummary")
 def tasksummary():
     if request.method == "GET":
-        tasks_due_today = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
+        #tasks_due_today = Tasks.query.filter_by(task_owner_id = current_user.id, state=0).filter_by(due_date = datetime.date(datetime.now())).all()
         with engine.connect() as con:
+            tasks_due_today = con.execute(
+            """SELECT t.*, l.list_name
+            FROM public."Tasks" t
+            JOIN public."Lists" l
+            ON l.list_id = t.list_id
+            WHERE t.task_owner_id = %s
+            AND t.due_date = CURRENT_DATE
+            AND t.state = 0""", (current_user.id))
             tasks_overdue = con.execute(
             """SELECT t.*, l.list_name
             FROM public."Tasks" t
@@ -300,7 +308,7 @@ def tasksummary():
             ON l.list_id = t.list_id
             WHERE t.task_owner_id = %s
             AND t.due_date > CURRENT_DATE
-            --AND t.state = 0
+            AND t.state = 0
             ORDER BY t.due_date ASC""", (current_user.id))
 
         #other_tasks = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
