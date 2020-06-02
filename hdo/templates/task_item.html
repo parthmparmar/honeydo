@@ -7,6 +7,11 @@
     <div class="task ml-2 mr-2 {{ "completed" if task.state == 1 }}">
       {{task.task_name}}
     </div>
+    {% if task.list_name %}
+    <div>
+    |    From List: <a href="/list/{{task.list_id}}">{{task.list_name}} </a>
+    </div>
+    {% endif %}
   </div>
 
   <div class="d-flex align-items-center justify-content-end due-date col-3">
