@@ -1,35 +1,63 @@
 {% extends "base/base_html.html" %}
-
 {% block body %}
+
+
+
 <div class="container">
   {% include "base/alerts.html" %}
   {% include "base/modal-yes-no.html" %}
   {% include "base/task-edit-modal.html" %}
+  <h1>Overview of All Tasks</h1><br>
+  <table style="width:100%" style="text-align:center">
+    <tr>
+      <th style="text-align:center">Overdue</th>
+      <th style="text-align:center">Due Today</th>
+      <th style="text-align:center">Backlog</th>
+    </tr>
+    <tr>
+      <td style="text-align:center">{{data.tasks_overdue.rowcount}}</td>
+      <td style="text-align:center">{{data.tasks_due_today.rowcount}}</td>
+      <td style="text-align:center">{{data.other_tasks.rowcount}}</td>
+    </tr>
+  </table>
+  <br>
   <div class="task-view">
     <h3> Tasks Overdue </h3>
-    {% for tasks in data.tasks_overdue %}
-      {% with task=tasks %}
-        {% include "/task_item.html" %}
-      {% endwith %}
-    {% endfor %}
-  </div>
+    {% if  data.tasks_overdue.rowcount == 0 %}
+        You're caught up!
+    {% else %}
+      {% for tasks in data.tasks_overdue %}
+        {% with task=tasks %}
+          {% include "/task_item.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  </div><br>
 
   <div class="task-view">
     <h3> Tasks Due Today </h3>
-    {% for tasks in data.tasks_due_today %}
-      {% with task=tasks %}
-        {% include "/task_item.html" %}
-      {% endwith %}
-    {% endfor %}
-  </div>
+    {% if  data.tasks_due_today.rowcount == 0 %}
+        Nothing Today
+    {% else %}
+      {% for tasks in data.tasks_due_today %}
+        {% with task=tasks %}
+          {% include "/task_item.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  </div><br>
 
   <div class="task-view">
     <h3> Other Tasks </h3>
-    {% for tasks in data.other_tasks %}
-      {% with task=tasks %}
-        {% include "/task_item.html" %}
-      {% endwith %}
-    {% endfor %}
+    {% if  data.other_tasks.rowcount == 0 %}
+          Nothing Scheduled For You
+    {% else %}
+      {% for tasks in data.other_tasks %}
+        {% with task=tasks %}
+          {% include "/task_item.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
   </div>
 </div>
 
