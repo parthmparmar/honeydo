@@ -7,7 +7,7 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import re
-from hdo.utilities.db_functions import is_owner, has_access, list_type
+from hdo.utilities.db_functions import is_owner, has_access, list_num_users
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 engine = create_engine('postgresql://postgres:2123@localhost/honeydo')
@@ -74,7 +74,7 @@ def logout():
 def dashboard():
     if request.method == "GET":
         user_lists = Access.query.filter_by(user_id=current_user.id).all()
-        user_lists = list_type(user_lists)
+        user_lists = list_num_users(user_lists)
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
         data = {"user_lists": user_lists, "modal": modal, "user": current_user}
         return render_template("lists.html", data = data)
@@ -102,6 +102,7 @@ def list_display(list_id):
                     GROUP BY a.user_id, u.name
                     ORDER BY points desc""", (list_id))
                 list = Lists.query.filter_by(list_id=list_id).first()
+                list = list_num_users(list)
                 task_data = {"tasks": all_tasks}
                 scoreboard_data = {"sb_data": complete_tasks}
                 modal = {"title": "Confirm", "msg": "Are you sure you want to delete the task?"}
@@ -254,6 +255,41 @@ def api_update_state(list_id, task_id):
         #flash(task_name + " was updated", "success")
         #return redirect(url_for("list_display", list_id = list_id))
         return "task updated"
+
+@app.route("/api/<list_id>/task/<task_id>/claim", methods=["PUT"])
+def api_assign_user(list_id, task_id):
+    user_id = current_user.id
+    list = Lists.query.filter_by(list_id = list_id).first()
+    list = list_num_users(list)
+    if list.num_users > 1:
+        action = "claimed"
+    else:
+        action = "prioritized"
+    if request.method == "PUT":
+        task_to_update = Tasks.query.filter_by(task_id=task_id).first()
+        task_name = task_to_update.task_name
+        if not task_to_update.assigned_user_id:
+            task_to_update.assigned_user_id = user_id
+            db.session.commit()
+            flash(task_name + " was " + action + " by you", "success")
+            return "success"
+        elif task_to_update.assigned_user_id == user_id:
+            task_to_update.assigned_user_id = None
+            db.session.commit()
+            flash(task_name + " was un-" + action + " by you", "success")
+            return "success"
+        elif task_to_update.assign_user_id != user_id:
+            if is_owner(current_user.id, list_id):
+                task_to_update.assigned_user_id = assigned_user_id
+                db.session.commit()
+                flash(task_name + " was " + action + " by you", "success")
+                return "success"
+            else:
+                flash("Task has been claimed by someone else, please contact list owner to change", "warning")
+                return "not allowed"
+
+
+
 
 @app.route("/api/task/<task_id>/update", methods=["PUT"])
 def api_update_task(task_id):

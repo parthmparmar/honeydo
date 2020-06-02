@@ -22,8 +22,16 @@
   color:red;
 }
 
-.claim_task {
+.task_claim {
   color: gray;
+}
+
+.claimed {
+  color:green;
+}
+
+.fa-star.claimed {
+  color:yellow;
 }
 
 .task_edit {

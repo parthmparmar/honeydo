@@ -53,6 +53,8 @@ class Tasks(db.Model):  #accessing Model class of SQLAlchemy
 	due_date=db.Column(db.Date)
 	reset_time=db.Column(db.DateTime)
 	state=db.Column(db.Integer)
+	assigned_user_id=db.Column(db.Integer, db.ForeignKey("Users.id"))
+	assigned_user = db.relationship("Users", foreign_keys = [assigned_user_id], lazy = True)
 	completed_by_id=db.Column(db.Integer, db.ForeignKey("Users.id"))
 	completed_by = db.relationship("Users", foreign_keys = [completed_by_id], lazy = True)
 	points=db.Column(db.Integer)
