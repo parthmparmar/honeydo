@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block body %}
-
 <div class="container">
+
   {% include "base/alerts.html" %}
   {% include "base/modal-yes-no.html" %}
   {% include "base/task-edit-modal.html" %}
@@ -33,9 +33,9 @@
         <div class="input-group-prepend">
           <button class="btn btn-outline-success" type="submit"><i class="fas fa-plus"></i></button>
         </div>
-        <input name="task_name" type="text" class="form-control" placeholder="Add a new task" required />
-        <input name="points" type="number" class="form-control" placeholder="Point Value" />
-        <input name="due_date" type="date" class="form-control" placeholder="Due Date" />
+        <input name="new_task_name" type="text" class="form-control" placeholder="Add a new task" required />
+        <input name="new_points" type="number" class="form-control" placeholder="Point Value" />
+        <input name="new_due_date" type="date" class="form-control" placeholder="Due Date" />
       </div>
     </form>
   </div>

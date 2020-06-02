@@ -32,3 +32,5 @@ $("#register").submit(function(){
     return false;
   };
   });
+
+$(".navbar").addClass("d-none");

@@ -1,0 +1,41 @@
+{% extends "base/base_html.html" %}
+
+{% block body %}
+<div class="container">
+  {% include "base/alerts.html" %}
+  {% include "base/modal-yes-no.html" %}
+  {% include "base/task-edit-modal.html" %}
+  <div class="task-view">
+    <h3> Tasks Overdue </h3>
+    {% for tasks in data.tasks_overdue %}
+      {% with task=tasks %}
+        {% include "/task_item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  <div class="task-view">
+    <h3> Tasks Due Today </h3>
+    {% for tasks in data.tasks_due_today %}
+      {% with task=tasks %}
+        {% include "/task_item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  <div class="task-view">
+    <h3> Other Tasks </h3>
+    {% for tasks in data.other_tasks %}
+      {% with task=tasks %}
+        {% include "/task_item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ url_for('static', filename='script/tasks_page.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
+{% endblock %}
