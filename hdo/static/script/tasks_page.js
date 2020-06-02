@@ -109,3 +109,15 @@ $(".task_edit").on("click", function() {
 });
 
 //$('input')[0].form.new_point_value.value
+
+$(".task_claim").on("click", function() {
+  console.log("click");
+  task_id = $(this).closest(".button-div").data("task_id");
+  list_id = $(this).closest(".button-div").data("list_id");
+  $.ajax({
+    url:"/api/" + list_id + "/task/" + task_id + "/claim",
+    method: "PUT",
+  }).done(function (resp) {
+    location.reload();
+  });
+});
