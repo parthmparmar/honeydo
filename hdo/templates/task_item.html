@@ -19,12 +19,8 @@
       {{task.points}}
     </div>
     {% endif %}
-    <div class="ml-2 button-div" data-task_id={{task.task_id}} data-list_id={{task.list_id}}>
-      {% if list.num_users == 1 %}
-        <button class="p-0 btn task_claim"><i class="fas fa-star {{"claimed" if task.assigned_user_id }}"></i></button>
-      {% else %}
-        <button class="p-0 btn task_claim"><i class="fas fa-hand-paper {{"claimed" if task.assigned_user_id }}"></i></button>
-      {% endif %}
+    <div class="ml-2">
+      <button class="p-0 btn claim_task"><i class="fas fa-hand-paper"></i></button>
       <button data-task_id = {{task.task_id}} data-task_name = "{{task.task_name}}" data-due_date = {{task.due_date}} data-points={{task.points}} class="p-0 btn task_edit"><i class="fas fa-pencil-alt"></i></button>
       <button class="p-0 btn delete_task" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="fas fa-backspace"></i></button>
     </div>
