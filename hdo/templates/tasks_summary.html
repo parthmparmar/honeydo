@@ -1,8 +1,6 @@
 {% extends "base/base_html.html" %}
 {% block body %}
 
-
-
 <div class="container">
   {% include "base/alerts.html" %}
   {% include "base/modal-yes-no.html" %}
@@ -24,7 +22,7 @@
   <div class="task-view">
     <h3> Tasks Overdue </h3>
     {% if  data.tasks_overdue.rowcount == 0 %}
-        You're caught up!
+        All caught up
     {% else %}
       {% for tasks in data.tasks_overdue %}
         {% with task=tasks %}
@@ -64,6 +62,7 @@
 {% endblock %}
 
 {% block javascript %}
+<script type="text/javascript" src="{{ url_for('static', filename='script/task_summary.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/tasks_page.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
 {% endblock %}

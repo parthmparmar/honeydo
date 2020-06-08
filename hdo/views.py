@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, flash, abort, jsonify
+from flask import Flask, redirect, url_for, render_template, request, flash, abort, jsonify, Markup
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
@@ -11,7 +11,9 @@ import re
 from hdo.utilities.db_functions import is_owner, has_access, list_num_users
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine
-engine = create_engine('postgresql://postgres:2123@localhost/honeydo')
+from config import *
+
+engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
 @app.route('/')
 def hello_world():
@@ -35,7 +37,7 @@ def login():
             if check_password_hash(user.hash_password, password):
                 login_user(user)
                 flash("Welcome Back " + user.name, "success")
-                return redirect(url_for("dashboard"))
+                return redirect(url_for("tasksummary"))
 
         flash("email and/or password incorrect, please try again." "warning")
         return redirect(url_for("login"))
@@ -237,10 +239,9 @@ def api_delete_task(list_id, task_id):
         return "task deleted"
         #return redirect(url_for("list_display", list_id = list_id))
 
-@app.route("/api/<list_id>/task/<task_id>/update_state", methods=["PUT"])
-def api_update_state(list_id, task_id):
+@app.route("/api/task/<task_id>/update_state/<location>", methods=["PUT"])
+def api_update_state(task_id, location):
     if request.method == "PUT":
-
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
         task_name = task_to_update.task_name
         if task_to_update.state == 1:
@@ -249,6 +250,8 @@ def api_update_state(list_id, task_id):
         elif task_to_update.state == 0:
             task_to_update.state = 1
             task_to_update.completed_by_id = current_user.id
+            if location == "in_summary":
+                flash(task_name + " was marked complete " + Markup('<a href="#" class="toggle_task" data-task_id={}>UNDO</a>'.format(task_id)))
         else:
             task_to_update.state = 0
         #db.session.update(task_to_update) #wrong method
@@ -332,7 +335,7 @@ def tasksummary():
             FROM public."Tasks" t
             JOIN public."Lists" l
             ON l.list_id = t.list_id
-            WHERE t.task_owner_id = %s
+            WHERE t.task_owner_id= %s
             AND t.due_date < CURRENT_DATE
             AND t.state = 0
             ORDER BY t.due_date ASC""", (current_user.id))
@@ -343,12 +346,11 @@ def tasksummary():
             JOIN public."Lists" l
             ON l.list_id = t.list_id
             WHERE t.task_owner_id = %s
-            AND t.due_date > CURRENT_DATE
+            AND (t.due_date > CURRENT_DATE OR t.due_date IS NULL)
             AND t.state = 0
             ORDER BY t.due_date ASC""", (current_user.id))
 
         #other_tasks = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
         data = {"tasks_due_today": tasks_due_today, "tasks_overdue": tasks_overdue, "other_tasks": other_tasks, "modal": modal}
-
         return render_template("tasks_summary.html", data = data)
