@@ -55,10 +55,10 @@ $(".delete_task").on("click", function() {
 
 
 $(".toggle_task").on("click", function() {
-  list_id = $(this).data("list_id");
+  //list_id = $(this).data("list_id");
   task_id = $(this).data("task_id");
     $.ajax({
-      url:"/api/"+list_id+"/task/"+task_id+"/update_state",
+      url:"/api/task/"+task_id+"/update_state/in_list",
       method: "PUT"
     }).done(function (resp) {
       if (resp == "task updated"){
@@ -67,6 +67,22 @@ $(".toggle_task").on("click", function() {
       }
     });
 });
+
+
+$(".toggle_task_on_summary").on("click", function() {
+  //list_id = $(this).data("list_id");
+  task_id = $(this).data("task_id");
+    $.ajax({
+      url:"/api/task/"+task_id+"/update_state/in_summary",
+      method: "PUT"
+    }).done(function (resp) {
+      if (resp == "task updated"){
+        location.reload();
+      // $("#task_info"+task_id).load(location.href + "#task_info"+task_id); MAKE THIS TOGGLE THE TEXT INSTEAD
+      }
+    });
+});
+
 
 
 
