@@ -1,5 +1,8 @@
 from hdo.models import Users, Lists, Access, Tasks
 from hdo import db
+import string
+from random import *
+
 
 def is_owner(user_id, list_id):
     list = Lists.query.filter_by(list_id = list_id).first()
@@ -26,3 +29,8 @@ def list_num_users(lists):
         access = Access.query.filter_by(list_id = lists.list_id).all()
         lists.num_users = len(access)
     return lists
+
+def random_password():
+    characters = string.ascii_letters + string.digits
+    password =  "".join(choice(characters) for x in range(randint(8, 16)))
+    return password
