@@ -55,7 +55,6 @@ $(".delete_task").on("click", function() {
 
 
 $(".toggle_task").on("click", function() {
-  //list_id = $(this).data("list_id");
   task_id = $(this).data("task_id");
     $.ajax({
       url:"/api/task/"+task_id+"/update_state/in_list",
@@ -63,14 +62,12 @@ $(".toggle_task").on("click", function() {
     }).done(function (resp) {
       if (resp == "task updated"){
         location.reload();
-      // $("#task_info"+task_id).load(location.href + "#task_info"+task_id); MAKE THIS TOGGLE THE TEXT INSTEAD
       }
     });
 });
 
 
 $(".toggle_task_on_summary").on("click", function() {
-  //list_id = $(this).data("list_id");
   task_id = $(this).data("task_id");
     $.ajax({
       url:"/api/task/"+task_id+"/update_state/in_summary",
@@ -78,7 +75,6 @@ $(".toggle_task_on_summary").on("click", function() {
     }).done(function (resp) {
       if (resp == "task updated"){
         location.reload();
-      // $("#task_info"+task_id).load(location.href + "#task_info"+task_id); MAKE THIS TOGGLE THE TEXT INSTEAD
       }
     });
 });
@@ -88,9 +84,7 @@ $(".toggle_task_on_summary").on("click", function() {
 
 $(".task_edit").on("click", function() {
   task_id = $(this).data("task_id");
-  //var $current_task_name = decodeURIComponent($('.task_edit').data('task_name'))
   current_task_name = $(this).data('task_name');
-  //strings are saved with "_" replacing spaces for now. This replaces the "_" with spaces before loading the value into the form
   current_points = $(this).data('points');
   current_date = $(this).data('due_date');
 
@@ -98,14 +92,8 @@ $(".task_edit").on("click", function() {
 
   $('input[name="task_name"]').val(current_task_name);
   $('input[name="points"]').val(current_points);
+  $('input[name="due_date"]').val(current_date);
 
-  //if ($('input[name="due_date"]').val() == NULL){
-  //  $('input[name="due_date"]').val(" ");
-  //}
-  //else{
-    $('input[name="due_date"]').val(current_date);
-
-  //}
 
   $("#submit-edited-task").on("click", function() {
     task_name = $("#new_task_name").val().trim()
@@ -124,7 +112,6 @@ $(".task_edit").on("click", function() {
   });
 });
 
-//$('input')[0].form.new_point_value.value
 
 $(".task_claim").on("click", function() {
   console.log("click");

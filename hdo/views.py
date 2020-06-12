@@ -1,14 +1,13 @@
-from flask import Flask, redirect, url_for, render_template, request, flash, abort, jsonify, Markup
+from flask import Flask, redirect, url_for, render_template, request, flash, Markup
 from hdo import app
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
 from hdo import db, mail
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-import json
 import re
 from hdo.utilities.db_functions import is_owner, has_access, list_num_users, random_password
-from sqlalchemy.sql import text
+#from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 from config import *
 from flask_mail import Message
@@ -17,11 +16,9 @@ from hdo.utilities.email_functions import *
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
 @app.route('/')
+@login_required
 def hello_world():
-    try:
-        return "Hello " + current_user.name
-    except:
-        return 'Hello World'
+    return redirect(url_for("tasksummary"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -129,6 +126,7 @@ def list_display(list_id):
         #return list.list_name + " -- " + list.list_owner.email
 
 @app.route("/api/task/<list_id>/add", methods=["POST"])
+@login_required
 def api_task(list_id):
     if request.method == "POST":
         task_name = request.form["new_task_name"]
@@ -143,6 +141,7 @@ def api_task(list_id):
 
 
 @app.route("/api/list/<list_id>", methods=["POST", "DELETE", "PUT"])
+@login_required
 def api_list(list_id):
 
     if request.method == "POST":
@@ -180,6 +179,7 @@ def api_list(list_id):
             return "not allowed", 401
 
 @app.route("/api/access/", methods=["GET", "POST", "DELETE"])
+@login_required
 def api_access():
     list_id = request.args["list_id"]
 
@@ -232,6 +232,7 @@ def api_access():
             return "Access Item Not Found", 404
 
 @app.route("/api/<list_id>/task/<task_id>/delete", methods=["DELETE"])
+@login_required
 def api_delete_task(list_id, task_id):
     if request.method == "DELETE":
         task_to_delete = Tasks.query.filter_by(task_id=task_id).first()
@@ -240,9 +241,10 @@ def api_delete_task(list_id, task_id):
         db.session.commit()
         flash(task_name + " was deleted", "danger")
         return "task deleted"
-        #return redirect(url_for("list_display", list_id = list_id))
+
 
 @app.route("/api/task/<task_id>/update_state/<location>", methods=["PUT"])
+@login_required
 def api_update_state(task_id, location):
     if request.method == "PUT":
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
@@ -257,14 +259,12 @@ def api_update_state(task_id, location):
                 flash(task_name + " was marked complete " + Markup('<a href="#" class="toggle_task" data-task_id={}>UNDO</a>'.format(task_id)))
         else:
             task_to_update.state = 0
-        #db.session.update(task_to_update) #wrong method
         db.session.flush()
         db.session.commit()
-        #flash(task_name + " was updated", "success")
-        #return redirect(url_for("list_display", list_id = list_id))
         return "task updated"
 
 @app.route("/api/<list_id>/task/<task_id>/claim", methods=["PUT"])
+@login_required
 def api_assign_user(list_id, task_id):
     user_id = current_user.id
     list = Lists.query.filter_by(list_id = list_id).first()
@@ -300,6 +300,7 @@ def api_assign_user(list_id, task_id):
 
 
 @app.route("/api/task/<task_id>/update", methods=["PUT"])
+@login_required
 def api_update_task(task_id):
     if request.method == "PUT":
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
@@ -313,17 +314,15 @@ def api_update_task(task_id):
         new_date = request.form["due_date"] or None
         task_to_update.due_date = new_date
 
-        #db.session.update(task_to_update) #wrong method
         db.session.flush()
         db.session.commit()
-        #flash(task_name + " was updated", "success")
         return "task updated"
-        #redirect(url_for("list_display", list_id = list_id))
+
 
 @app.route("/tasksummary")
+@login_required
 def tasksummary():
     if request.method == "GET":
-        #tasks_due_today = Tasks.query.filter_by(task_owner_id = current_user.id, state=0).filter_by(due_date = datetime.date(datetime.now())).all()
         with engine.connect() as con:
             tasks_due_today = con.execute(
             """SELECT t.*, l.list_name
@@ -342,7 +341,6 @@ def tasksummary():
             AND t.due_date < CURRENT_DATE
             AND t.state = 0
             ORDER BY t.due_date ASC""", (current_user.id))
-        #tasks_overdue = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
             other_tasks = con.execute(
             """SELECT t.*, l.list_name
             FROM public."Tasks" t
@@ -352,8 +350,6 @@ def tasksummary():
             AND (t.due_date > CURRENT_DATE OR t.due_date IS NULL)
             AND t.state = 0
             ORDER BY t.due_date ASC""", (current_user.id))
-
-        #other_tasks = Tasks.query.filter_by(task_owner_id = current_user.id).filter_by(due_date = datetime.date(datetime.now())).all()
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
         data = {"tasks_due_today": tasks_due_today, "tasks_overdue": tasks_overdue, "other_tasks": other_tasks, "modal": modal}
         return render_template("tasks_summary.html", data = data)
@@ -402,10 +398,3 @@ def forgot_password():
 
         flash("No user with that email found!" "warning")
         return redirect(url_for("login"))
-
-
-
-@app.route("/test")
-def test():
-    new_password = random_password()
-    return new_password
