@@ -4,13 +4,16 @@ from .extensions import db
 # from hdo import models
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_mail import Mail
 
 app = Flask(__name__,instance_relative_config=False)
 app.config.from_object('config.DevelopmentConfig')
 db.init_app(app)
+mail = Mail(app)
 login = LoginManager()
 login.init_app(app)
-Bootstrap(app) #might need to be moved
+login.login_view = "login"
+
 
 from hdo import views
 

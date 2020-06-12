@@ -2,16 +2,17 @@ from flask import Flask, redirect, url_for, render_template, request, flash, abo
 from hdo import app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
-from hdo import db
-import datetime
+from hdo import db, mail
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import re
-from hdo.utilities.db_functions import is_owner, has_access, list_num_users
+from hdo.utilities.db_functions import is_owner, has_access, list_num_users, random_password
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 from config import *
+from flask_mail import Message
+from hdo.utilities.email_functions import *
 
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
@@ -53,7 +54,7 @@ def register():
         pattern = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])(?=.*[^\s])[A-Za-z\d@$!#%*?&]{8,}$")
         if re.match(pattern, password) is None:
             flash("Password does not meet minimum requirement of 8 Characters long, with one capital letter, one lowercase letter, one digit and one special character.", "danger")
-
+            return redirect(url_for("register"))
         email = request.form["email"]
         user = Users.query.filter_by(email=email).first()
 
@@ -61,9 +62,11 @@ def register():
             flash("Unfortunately, " + user.email + " is already in use.", 'danger')
             return redirect(url_for("register"))
         hashed_password = generate_password_hash(request.form["password"], method='sha256')
-        new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.datetime.now())
+        new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.now())
         db.session.add(new_user)
         db.session.commit()
+        email_new_user(request.form["email"])
+        flash("Please login", "success")
         return redirect(url_for("login"))
 
 @app.route('/logout')
@@ -354,3 +357,55 @@ def tasksummary():
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
         data = {"tasks_due_today": tasks_due_today, "tasks_overdue": tasks_overdue, "other_tasks": other_tasks, "modal": modal}
         return render_template("tasks_summary.html", data = data)
+
+@app.route("/reset-password", methods=["GET", "POST"])
+@login_required
+def reset_password():
+    if request.method == "GET":
+        return render_template("reset_password.html")
+    if request.method == "POST":
+        current_password = request.form["current-password"]
+        password = request.form["password"]
+        pattern = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])(?=.*[^\s])[A-Za-z\d@$!#%*?&]{8,}$")
+        if re.match(pattern, password) is None:
+            flash("Password does not meet minimum requirement of 8 Characters long, with one capital letter, one lowercase letter, one digit and one special character.", "danger")
+            return redirect(url_for("register"))
+
+        hashed_password = generate_password_hash(request.form["password"], method='sha256')
+
+        if check_password_hash(current_user.hash_password, current_password):
+            current_user.hash_password = hashed_password
+            db.session.commit()
+            flash("Password Reset", "success")
+            email_reset_password(current_user.email)
+            return redirect(url_for("dashboard"))
+        else:
+            flash("current password incorrect", "warning")
+            return redirect(url_for("dashboard"))
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "GET":
+        return render_template("forgot-password.html")
+    if request.method == "POST":
+        email = request.form["email"]
+        user = Users.query.filter_by(email=email).first()
+
+        if user:
+            new_password = random_password()
+            hashed_password = generate_password_hash(new_password, method='sha256')
+            user.hash_password = hashed_password
+            db.session.commit()
+            email_forgot_password(user.email, new_password)
+            flash("Email with new password send to " + user.email, "success")
+            return redirect(url_for("login"))
+
+        flash("No user with that email found!" "warning")
+        return redirect(url_for("login"))
+
+
+
+@app.route("/test")
+def test():
+    new_password = random_password()
+    return new_password

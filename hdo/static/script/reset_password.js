@@ -22,9 +22,11 @@ function password_compare(password, re_password) {
 };
 
 
-$("#register").submit(function(){
+$("#reset_password").submit(function(){
   var password = $("#password").val().trim();
   var re_password = $("#re-password").val().trim();
+  console.log(password)
+  console.log(re_password)
   if (password_validation(password) && password_compare(password, re_password)) {
     return true;
   }
@@ -32,5 +34,3 @@ $("#register").submit(function(){
     return false;
   };
   });
-
-$(".navbar").addClass("d-none");
