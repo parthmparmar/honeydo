@@ -1,9 +1,7 @@
 from flask import Flask
 from config import *
 from .extensions import db
-# from hdo import models
-from flask_bootstrap import Bootstrap
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager #, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail
 
 app = Flask(__name__,instance_relative_config=False)
