@@ -1,1 +1,3 @@
 # honeydo
+
+source .env
