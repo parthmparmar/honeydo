@@ -1,2 +1,1 @@
 
-$(".navbar").addClass("d-none");
