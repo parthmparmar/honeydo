@@ -22,7 +22,13 @@
   <div class="task-view">
     <h3> Tasks Overdue </h3>
     {% if  data.tasks_overdue.rowcount == 0 %}
-        All caught up
+
+    <div class="d-flex align-items-center p-2 border-bottom">
+        <div class="task ml-2 mr-2">
+          You're Caught Up!
+        </div>
+    </div>
+
     {% else %}
       {% for tasks in data.tasks_overdue %}
         {% with task=tasks %}
@@ -35,7 +41,11 @@
   <div class="task-view">
     <h3> Tasks Due Today </h3>
     {% if  data.tasks_due_today.rowcount == 0 %}
-        Nothing Today
+    <div class="d-flex align-items-center p-2 border-bottom">
+        <div class="task ml-2 mr-2">
+          Nothing Else Due Today
+        </div>
+    </div>
     {% else %}
       {% for tasks in data.tasks_due_today %}
         {% with task=tasks %}
@@ -48,7 +58,11 @@
   <div class="task-view">
     <h3> Other Tasks </h3>
     {% if  data.other_tasks.rowcount == 0 %}
-          Nothing Scheduled For You
+    <div class="d-flex align-items-center p-2 border-bottom">
+        <div class="task ml-2 mr-2">
+          Your Task Backlog Is Empty
+        </div>
+    </div>
     {% else %}
       {% for tasks in data.other_tasks %}
         {% with task=tasks %}
