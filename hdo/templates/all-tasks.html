@@ -1,0 +1,87 @@
+{% extends "base/base_html.html" %}
+
+{% block custom_css %}
+<link rel="stylesheet" href="../static/css/task-summary.css">
+{% endblock %}
+
+{% block body %}
+{% include "base/navbar.html" %}
+<div class="container">
+  {% include "base/alerts.html" %}
+  {% include "base/modal-yes-no.html" %}
+  {% include "base/task-edit-modal.html" %}
+  <h1>Overview of All Tasks</h1><br>
+  <table style="width:100%" style="text-align:center">
+    <tr>
+      <th style="text-align:center">Overdue</th>
+      <th style="text-align:center">Due Today</th>
+      <th style="text-align:center">Backlog</th>
+    </tr>
+    <tr>
+      <td style="text-align:center">{{data.tasks_overdue|length}}</td>
+      <td style="text-align:center">{{data.tasks_due_today|length}}</td>
+      <td style="text-align:center">{{data.other_tasks|length}}</td>
+    </tr>
+  </table>
+  <br>
+  <div class="task-view">
+    <h3> Tasks Overdue </h3>
+    {% if  data.tasks_overdue|length == 0 %}
+
+    <div class="d-flex align-items-center p-2 border-bottom">
+        <div class="task ml-2 mr-2">
+          You're Caught Up!
+        </div>
+    </div>
+
+    {% else %}
+      {% for tasks in data.tasks_overdue %}
+        {% with task=tasks %}
+          {% include "/task_item.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  </div><br>
+
+  <div class="task-view">
+    <h3> Tasks Due Today </h3>
+    {% if  data.tasks_due_today|length == 0 %}
+    <div class="d-flex align-items-center p-2 border-bottom">
+        <div class="task ml-2 mr-2">
+          Nothing Else Due Today
+        </div>
+    </div>
+    {% else %}
+      {% for tasks in data.tasks_due_today %}
+        {% with task=tasks %}
+          {% include "/task_item.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  </div><br>
+
+  <div class="task-view">
+    <h3> Other Tasks </h3>
+    {% if  data.other_tasks|length == 0 %}
+    <div class="d-flex align-items-center p-2 border-bottom">
+        <div class="task ml-2 mr-2">
+          Your Task Backlog Is Empty
+        </div>
+    </div>
+    {% else %}
+      {% for tasks in data.other_tasks %}
+        {% with task=tasks %}
+          {% include "/task_item.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ url_for('static', filename='script/task_summary.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='script/tasks_page.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
+{% endblock %}

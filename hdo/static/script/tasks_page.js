@@ -113,7 +113,7 @@ $(".task_edit").on("click", function() {
 });
 
 
-$(".task_claim").on("click", function() {
+$(".claim_task").on("click", function() {
   console.log("click");
   task_id = $(this).closest(".button-div").data("task_id");
   list_id = $(this).closest(".button-div").data("list_id");
@@ -124,3 +124,7 @@ $(".task_claim").on("click", function() {
     location.reload();
   });
 });
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
