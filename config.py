@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import psycopg2
 
 class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -16,6 +17,7 @@ if os.getenv('SECRET_KEY'):
     class ProductionConfig(Config):
         SECRET_KEY = os.getenv('SECRET_KEY')
         DATABASE_URL = os.getenv('DATABASE_URL')
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         DEBUG = False
 
 class DevelopmentConfig(Config):
