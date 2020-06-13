@@ -12,9 +12,11 @@ class Config(object):
     MAIL_USERNAME = os.getenv('EMAIL_USER')
     MAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
-class ProductionConfig(Config):
-
-    DEBUG = False
+if os.getenv('SECRET_KEY'):
+    class ProductionConfig(Config):
+        SECRET_KEY = os.getenv('SECRET_KEY')
+        DATABASE_URL = os.getenv('DATABASE_URL')
+        DEBUG = False
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI='postgresql://postgres:2123@localhost/honeydo'
