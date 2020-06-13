@@ -1,4 +1,4 @@
-console.log("Loaded");
+
 
 $(".delete_list").on("click", function() {
   list_id = $(this).data("list_id"); //comes from data tag on button element

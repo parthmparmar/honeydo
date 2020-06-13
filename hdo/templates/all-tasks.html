@@ -1,4 +1,9 @@
 {% extends "base/base_html.html" %}
+
+{% block custom_css %}
+<link rel="stylesheet" href="../static/css/task-summary.css">
+{% endblock %}
+
 {% block body %}
 {% include "base/navbar.html" %}
 <div class="container">
@@ -13,15 +18,15 @@
       <th style="text-align:center">Backlog</th>
     </tr>
     <tr>
-      <td style="text-align:center">{{data.tasks_overdue.rowcount}}</td>
-      <td style="text-align:center">{{data.tasks_due_today.rowcount}}</td>
-      <td style="text-align:center">{{data.other_tasks.rowcount}}</td>
+      <td style="text-align:center">{{data.tasks_overdue|length}}</td>
+      <td style="text-align:center">{{data.tasks_due_today|length}}</td>
+      <td style="text-align:center">{{data.other_tasks|length}}</td>
     </tr>
   </table>
   <br>
   <div class="task-view">
     <h3> Tasks Overdue </h3>
-    {% if  data.tasks_overdue.rowcount == 0 %}
+    {% if  data.tasks_overdue|length == 0 %}
 
     <div class="d-flex align-items-center p-2 border-bottom">
         <div class="task ml-2 mr-2">
@@ -40,7 +45,7 @@
 
   <div class="task-view">
     <h3> Tasks Due Today </h3>
-    {% if  data.tasks_due_today.rowcount == 0 %}
+    {% if  data.tasks_due_today|length == 0 %}
     <div class="d-flex align-items-center p-2 border-bottom">
         <div class="task ml-2 mr-2">
           Nothing Else Due Today
@@ -57,7 +62,7 @@
 
   <div class="task-view">
     <h3> Other Tasks </h3>
-    {% if  data.other_tasks.rowcount == 0 %}
+    {% if  data.other_tasks|length == 0 %}
     <div class="d-flex align-items-center p-2 border-bottom">
         <div class="task ml-2 mr-2">
           Your Task Backlog Is Empty

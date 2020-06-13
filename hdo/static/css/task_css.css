@@ -26,9 +26,6 @@
   color: gray;
 }
 
-.claimed {
-  color:green;
-}
 
 .fa-star.claimed {
   color:yellow;
@@ -38,6 +35,13 @@
   color: gray;
 }
 
+.claim_task {
+  color: gray;
+}
+
+.claimed {
+  color: #b9eac4;
+}
 /* move to correct css file */
 .user-name {
   font-siz: 20px;

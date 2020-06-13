@@ -1,0 +1,30 @@
+
+
+.task {
+  font-size: 20px;
+}
+
+.delete_task {
+  color:red;
+}
+
+.task_claim {
+  color: gray;
+}
+
+
+.fa-star.claimed {
+  color:yellow;
+}
+
+.task_edit {
+  color: gray;
+}
+
+.claim_task {
+  color: gray;
+}
+
+.claimed {
+  color: #b9eac4;
+}

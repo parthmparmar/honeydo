@@ -3,7 +3,7 @@ from hdo import app
 from flask_login import login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
 from hdo import db, mail
-from datetime import datetime
+from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
 from hdo.utilities.db_functions import is_owner, has_access, list_num_users, random_password
@@ -18,7 +18,7 @@ engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 @app.route('/')
 @login_required
 def hello_world():
-    return redirect(url_for("tasksummary"))
+    return redirect(url_for("all_tasks_page"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -35,7 +35,7 @@ def login():
             if check_password_hash(user.hash_password, password):
                 login_user(user)
                 flash("Welcome Back " + user.name, "success")
-                return redirect(url_for("tasksummary"))
+                return redirect(url_for("all_tasks_page"))
 
         flash("email and/or password incorrect, please try again." "warning")
         return redirect(url_for("login"))
@@ -375,10 +375,10 @@ def reset_password():
             db.session.commit()
             flash("Password Reset", "success")
             email_reset_password(current_user.email)
-            return redirect(url_for("tasksummary"))
+            return redirect(url_for("all_tasks_page"))
         else:
             flash("current password incorrect", "warning")
-            return redirect(url_for("tasksummary"))
+            return redirect(url_for("all_tasks_page"))
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -399,3 +399,30 @@ def forgot_password():
 
         flash("No user with that email found!" "warning")
         return redirect(url_for("login"))
+
+@app.route("/all-tasks", methods=["GET"])
+@login_required
+def all_tasks_page():
+    if request.method == "GET":
+        today_date = date.today()
+        tasks = Tasks.query.filter_by(assigned_user_id = current_user.id, state = 0).all()
+
+        past_due = []
+        due_today = []
+        other = []
+
+        for task in tasks:
+            if task.due_date == None or task.due_date > today_date:
+                task.list_name = task.list.list_name
+                other.append(task)
+            elif task.due_date == today_date:
+                task.list_name = task.list.list_name
+                due_today.append(task)
+            elif task.due_date < today_date:
+                task.list_name = task.list.list_name
+                past_due.append(task)
+            else:
+                other.append(task)
+        modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
+        data = {"tasks_due_today": due_today, "tasks_overdue": past_due, "other_tasks": other, "modal": modal}
+        return render_template("all-tasks.html", data = data)

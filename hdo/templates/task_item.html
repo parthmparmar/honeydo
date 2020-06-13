@@ -1,10 +1,11 @@
+
 <div class="d-flex align-items-center p-2 border-bottom">
   <div class="d-flex col-9 align-items-center">
     <div class="check-circle">
       <button class="removeWhenEmpty checkbox toggle_task btn {{"d-none" if task.state == 0 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-check-circle fa-lg" style="color:green"></i></button>
       <button class="removeWhenEmpty checkbox toggle_task btn {{"d-none" if task.state == 1 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-circle fa-lg"></i></button>
     </div>
-    <div class="removeWhenEmpty task ml-2 mr-2 {{ "completed" if task.state == 1 }}">
+    <div class="removeWhenEmpty task ml-2 mr-2 {{ "completed" if task.state == 1 }}" data-toggle="tooltip" data-placement="right" title="{{task.assigned_user.name}}">
       {{task.task_name}}
     </div>
     {% if task.list_name %}
@@ -27,8 +28,12 @@
       {{task.points}}
     </div>
     {% endif %}
-    <div class="removeWhenEmpty ml-2">
-      <button class="p-0 btn claim_task"><i class="fas fa-hand-paper"></i></button>
+    <div class="removeWhenEmpty ml-2 button-div" data-task_id = {{task.task_id}} data-list_id={{task.list_id}}>
+      {% if task.list.list_access|length > 1 %}
+      <button class="p-0 btn claim_task {{"claimed" if task.assigned_user_id}}"><i class="fas fa-hand-paper"></i></button>
+      {% else %}
+      <button class="p-0 btn claim_task {{"claimed" if task.assigned_user_id}}"><i class="fas fa-star"></i></button>
+      {% endif %}
       <button data-task_id = {{task.task_id}} data-task_name = "{{task.task_name}}" data-due_date = {{task.due_date}} data-points={{task.points}} class="p-0 btn task_edit"><i class="fas fa-pencil-alt"></i></button>
       <button class="p-0 btn delete_task" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="fas fa-backspace"></i></button>
     </div>
