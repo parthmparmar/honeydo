@@ -1,1 +1,1 @@
-web: gunicorn app:hdo
+web: gunicorn hdo:app
