@@ -17,8 +17,10 @@ if os.getenv('SECRET_KEY'):
     class ProductionConfig(Config):
         SECRET_KEY = os.getenv('SECRET_KEY')
         SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-        conn = psycopg2.connect(SQLALCHEMY_DATABASE_URI, sslmode='require')
+        # conn = psycopg2.connect(SQLALCHEMY_DATABASE_URI, sslmode='require')
         DEBUG = False
+        def devDB():
+            return SQLALCHEMY_DATABASE_URI
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI='postgresql://postgres:2123@localhost/honeydo'
