@@ -1,1 +1,1 @@
-web: gunicorn hdo:app
+web: flask db upgrade; gunicorn hdo:app
