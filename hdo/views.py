@@ -99,13 +99,14 @@ def list_display(list_id):
                     complete_tasks = con.execute(
                     """SELECT a.user_id, u.name, SUM (CASE WHEN a.user_id = t.completed_by_id THEN t.points ELSE 0 END) AS points
                     FROM public."Access" a
-                    JOIN public."Tasks" t
+                    LEFT JOIN public."Tasks" t
                     ON a.list_id = t.list_id
                     JOIN public."Users" u
                     ON a.user_id = u.id
                     WHERE a.list_id = %s
                     GROUP BY a.user_id, u.name
                     ORDER BY points desc""", (list_id))
+
                 list = Lists.query.filter_by(list_id=list_id).first()
                 list = list_num_users(list)
                 task_data = {"tasks": all_tasks}
