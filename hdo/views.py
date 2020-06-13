@@ -18,7 +18,7 @@ engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 @app.route('/')
 @login_required
 def hello_world():
-    return redirect(url_for("tasksummary"))
+    return redirect(url_for("all_tasks_page"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -35,7 +35,7 @@ def login():
             if check_password_hash(user.hash_password, password):
                 login_user(user)
                 flash("Welcome Back " + user.name, "success")
-                return redirect(url_for("tasksummary"))
+                return redirect(url_for("all_tasks_page"))
 
         flash("email and/or password incorrect, please try again." "warning")
         return redirect(url_for("login"))
@@ -374,10 +374,10 @@ def reset_password():
             db.session.commit()
             flash("Password Reset", "success")
             email_reset_password(current_user.email)
-            return redirect(url_for("tasksummary"))
+            return redirect(url_for("all_tasks_page"))
         else:
             flash("current password incorrect", "warning")
-            return redirect(url_for("tasksummary"))
+            return redirect(url_for("all_tasks_page"))
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():

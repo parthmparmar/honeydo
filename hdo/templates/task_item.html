@@ -36,7 +36,6 @@
       {% endif %}
       <button data-task_id = {{task.task_id}} data-task_name = "{{task.task_name}}" data-due_date = {{task.due_date}} data-points={{task.points}} class="p-0 btn task_edit"><i class="fas fa-pencil-alt"></i></button>
       <button class="p-0 btn delete_task" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="fas fa-backspace"></i></button>
-      <span>{{task.list.list_access|length}}</span>
     </div>
   </div>
 </div>
