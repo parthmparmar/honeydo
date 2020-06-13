@@ -16,7 +16,7 @@ class Config(object):
 if os.getenv('SECRET_KEY'):
     class ProductionConfig(Config):
         SECRET_KEY = os.getenv('SECRET_KEY')
-        DATABASE_URL = os.getenv('DATABASE_URL')
+        SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         DEBUG = False
 
