@@ -1,14 +1,16 @@
 import os
+from dotenv import load_dotenv
 
 class Config(object):
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = False
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    MAIL_USERNAME = os.environ.get('EMAIL_USER')
-    MAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+    MAIL_USERNAME = os.getenv('EMAIL_USER')
+    MAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
 class ProductionConfig(Config):
 

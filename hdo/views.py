@@ -374,10 +374,10 @@ def reset_password():
             db.session.commit()
             flash("Password Reset", "success")
             email_reset_password(current_user.email)
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("tasksummary"))
         else:
             flash("current password incorrect", "warning")
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("tasksummary"))
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
