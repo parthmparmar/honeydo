@@ -1,17 +1,23 @@
+/* body{
+  background-color: #faf3dd;
+} */
+
+nav{
+  background-color: #faf3dd;
+}
+
+.task-view{
+  border: 1px solid white;
+  border-radius: 4px;
+  background-color: #fbfbf8;
+}
+
 .completed {
   text-decoration: line-through wavy gray;
 }
 
 .c-green {
   color: green;
-}
-
-.c-yellow {
-  color: yellow;
-}
-
-.c-orange {
-  color: orange;
 }
 
 .task {
@@ -28,7 +34,7 @@
 
 
 .fa-star.claimed {
-  color:yellow;
+  color: yellow;
 }
 
 .task_edit {
