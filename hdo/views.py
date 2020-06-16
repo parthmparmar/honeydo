@@ -319,6 +319,18 @@ def api_update_task(task_id):
         db.session.commit()
         return "task updated"
 
+@app.route("/api/task/<task_id>/update_description", methods=["PUT"])
+@login_required
+def api_update_task_description(task_id):
+    if request.method == "PUT":
+        task_to_update = Tasks.query.filter_by(task_id=task_id).first()
+
+        task_description = request.form["task_description"]
+        task_to_update.task_description = task_description
+
+        db.session.flush()
+        db.session.commit()
+        return "task updated"
 
 @app.route("/tasksummary")
 @login_required
