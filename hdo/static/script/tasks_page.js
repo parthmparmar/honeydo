@@ -82,6 +82,38 @@ $(".toggle_task_on_summary").on("click", function() {
 
 
 
+$(".show_task_description").on("click", function(){
+  task_description = $(this).data("task_description");
+
+
+
+  console.log(task_description)
+  task_id = $(this).data("task_id");
+  $('#task-description-modal').modal('show')
+  if (task_description == 'None')  {
+    $('textarea[name="task_description"]').val("");
+  }
+  else{
+    $('textarea[name="task_description"]').val(task_description);
+  }
+
+  $("#submit-task-description").on("click", function() {
+    task_description = $("#task_description").val().trim()
+    $.ajax({
+      url:"/api/task/"+task_id+"/update_description",
+      method: "PUT",
+      data: {task_description: task_description}
+    }).done(function (resp) {
+      if (resp == "task updated"){
+        location.reload();
+      }
+    });
+  });
+});
+
+
+
+
 $(".task_edit").on("click", function() {
   task_id = $(this).data("task_id");
   current_task_name = $(this).data('task_name');

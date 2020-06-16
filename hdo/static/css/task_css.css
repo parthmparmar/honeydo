@@ -61,3 +61,7 @@ nav{
   height: 500px;
   overflow: scroll;
 }
+
+.contains-note {
+  color: #FF6600;
+}

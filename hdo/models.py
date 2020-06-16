@@ -1,7 +1,7 @@
 from hdo import db, login
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
-class Users(UserMixin, db.Model): 
+class Users(UserMixin, db.Model):
 	__tablename__ = "Users"
 	id=db.Column(db.Integer, primary_key=True)
 	email=db.Column(db.String, unique=True)
@@ -42,6 +42,7 @@ class Tasks(db.Model):
 	completed_by = db.relationship("Users", foreign_keys = [completed_by_id], lazy = True)
 	points=db.Column(db.Integer)
 	repeat=db.Column(db.Integer)
+	task_description=db.Column(db.String)
 
 class Access(db.Model):
 	__tablename__ = "Access"
