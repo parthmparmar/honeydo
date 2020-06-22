@@ -9,6 +9,7 @@ class Users(UserMixin, db.Model):
 	hash_password=db.Column(db.String)
 	active=db.Column(db.Integer)
 	last_login=db.Column(db.DateTime)
+	user_created_date=db.Column(db.DateTime)
 
 @login.user_loader
 def load_user(id):
@@ -43,6 +44,8 @@ class Tasks(db.Model):
 	points=db.Column(db.Integer)
 	repeat=db.Column(db.Integer)
 	task_description=db.Column(db.String)
+	task_completed_date=db.Column(db.DateTime)
+
 
 class Access(db.Model):
 	__tablename__ = "Access"

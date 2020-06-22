@@ -34,3 +34,15 @@ def random_password():
     characters = string.ascii_letters + string.digits
     password =  "".join(choice(characters) for x in range(randint(8, 16)))
     return password
+
+def tasks_by_owner_list_state(current_user, list_id, state):
+    tasks = Tasks.query.filter_by(task_owner_id = current_user, list_id = list_id, state = state)
+    return tasks
+
+def tasks_by_owner_state(current_user, state):
+    tasks = Tasks.query.filter_by(task_owner_id = current_user, state = state).order_by(Tasks.task_completed_date.desc())
+    return tasks
+
+def tasks_by_id(task_id):
+    tasks = Tasks.query.filter_by(task_id = task_id).first()
+    return tasks
