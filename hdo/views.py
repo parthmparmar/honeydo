@@ -6,7 +6,7 @@ from hdo import db, mail
 from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
-from hdo.utilities.db_functions import is_owner, has_access, list_num_users, random_password
+from hdo.utilities.db_functions import * #is_owner, has_access, list_num_users, random_password
 #from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 from config import *
@@ -33,6 +33,9 @@ def login():
 
         if user:
             if check_password_hash(user.hash_password, password):
+                user.last_login = datetime.now()
+                db.session.flush()
+                db.session.commit()
                 login_user(user)
                 flash("Welcome Back " + user.name, "success")
                 return redirect(url_for("all_tasks_page"))
@@ -59,7 +62,7 @@ def register():
             flash("Unfortunately, " + user.email + " is already in use.", 'danger')
             return redirect(url_for("register"))
         hashed_password = generate_password_hash(request.form["password"], method='sha256')
-        new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, last_login = datetime.now())
+        new_user = Users(email = request.form["email"], name = request.form["name"] , hash_password = hashed_password, active = 0, user_created_date = datetime.now())
         db.session.add(new_user)
         db.session.commit()
         email_new_user(request.form["email"])
@@ -90,11 +93,11 @@ def list_display(list_id):
         list = Lists.query.filter_by(list_id=list_id).first()
         if list:
             if has_access(current_user.id, list_id):
-                tasks = Tasks.query.filter_by(list_id=list_id).all()
+                tasks = Tasks.query.filter_by(list_id=list_id).filter(Tasks.state != 2).all()
                 task_data = {"tasks": tasks}
                 users = Access.query.filter_by(list_id=list_id).all()
 
-                all_tasks = Tasks.query.order_by(Tasks.task_id).filter_by(list_id=list_id).all()
+                all_tasks = Tasks.query.order_by(Tasks.task_id).filter_by(list_id=list_id).filter(Tasks.state != 2).all()
                 with engine.connect() as con:
                     complete_tasks = con.execute(
                     """SELECT a.user_id, u.name, SUM (CASE WHEN a.user_id = t.completed_by_id THEN t.points ELSE 0 END) AS points
@@ -179,6 +182,19 @@ def api_list(list_id):
             flash("You are not the owner of the list, please ask the owner to change the name", "danger")
             return "not allowed", 401
 
+@app.route("/api/list/description/<list_id>", methods=["PUT"])
+@login_required
+def api_list_description(list_id):
+    if request.method == "PUT":
+        if is_owner(current_user.id, list_id):
+            list = Lists.query.filter_by(list_id = list_id).first()
+            list.list_description = request.form["new_list_description"] or None
+            db.session.commit()
+            return "list updated"
+        else:
+            flash("You are not the owner of the list, please ask the owner to change the name", "danger")
+            return "not allowed", 401
+
 @app.route("/api/access/", methods=["GET", "POST", "DELETE"])
 @login_required
 def api_access():
@@ -253,9 +269,11 @@ def api_update_state(task_id, location):
         if task_to_update.state == 1:
             task_to_update.state = 0
             task_to_update.completed_by_id = None
+            task_to_update.task_completed_date = None
         elif task_to_update.state == 0:
             task_to_update.state = 1
             task_to_update.completed_by_id = current_user.id
+            task_to_update.task_completed_date = datetime.now()
             if location == "in_summary":
                 flash(task_name + " was marked complete " + Markup('<a href="#" class="toggle_task" data-task_id={}>UNDO</a>'.format(task_id)))
         else:
@@ -438,3 +456,33 @@ def all_tasks_page():
         modal = {"title": "Confirm", "msg": "Are you sure you want to delete the list?"}
         data = {"tasks_due_today": due_today, "tasks_overdue": past_due, "other_tasks": other, "modal": modal}
         return render_template("all-tasks.html", data = data)
+
+@app.route("/api/archive/<list_id>", methods=['PUT'])
+@login_required
+def archive_tasks(list_id):
+    if request.method == "PUT":
+        #tasks = Tasks.query.filter_by(task_owner_id = current_user.id, state = 1)
+        tasks = tasks_by_owner_list_state(current_user.id,list_id,1)
+        for task in tasks:
+            task.state = 2
+            db.session.flush()
+            db.session.commit()
+        return "tasks archived"  #redirect(url_for("all_tasks_page"))
+
+@app.route("/archives", methods=["GET"])
+@login_required
+def archives():
+    if request.method == "GET":
+        tasks = tasks_by_owner_state(current_user.id, 2)
+        data = {"tasks": tasks, "user": current_user}
+        return render_template("archive.html", data=data)
+
+@app.route("/api/unarchive/<task_id>", methods=["PUT"])
+@login_required
+def unarchive(task_id):
+    if request.method == "PUT":
+        task = tasks_by_id(task_id)
+        task.state = 1
+        db.session.flush()
+        db.session.commit()
+        return "task unarchived"

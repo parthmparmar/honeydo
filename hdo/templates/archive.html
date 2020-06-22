@@ -1,0 +1,37 @@
+{% extends "base/base_html.html" %}
+
+{% block custom_css %}
+<link rel="stylesheet" href="../static/css/archive.css">
+{% endblock %}
+{% block body %}
+{% include "base/navbar.html" %}
+<div class="container">
+  {% include "base/alerts.html" %}
+
+  <h3 class="">Hello {{data.user.name}}!</h3>
+
+  <div class="lists-view">
+    <h5>Your Archived Completed Tasks:</h5>
+    <table class="table">
+      <tr>
+        <th>List Name</th>
+        <th>Task Name</th>
+        <th>Points</th>
+        <th>Date Completed</th>
+        <th>Actions</th>
+      </tr>
+      {% for task in data.tasks %}
+      <tr class="archive-list">
+        <th>{{task.list.list_name}}</th>
+        <th>{{task.task_name}}</th>
+        <th>{{task.points}}</th>
+        <th>{{task.task_completed_date.strftime('%Y-%m-%d %H:%M:%S') }}</th>
+        <th><button data-task_id={{task.task_id}} id="unarchive" class="btn btn-sm btn-outline-secondary unarchive" type="button">Unarchive</button></th>
+      </tr>
+      {% endfor %}
+    </table>
+</div>
+{% endblock %}
+{% block javascript %}
+<script type="text/javascript" src="{{ url_for('static', filename='script/archive.js') }}"></script>
+{% endblock %}
