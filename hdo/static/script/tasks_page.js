@@ -35,7 +35,7 @@ $("#update-list-name").on("click", function (){
   };
 });
 
-$(".delete_task").on("click", function() {
+$(document).on("click", ".delete_task", function(){
   list_id = $(this).data("list_id");
   task_id = $(this).data("task_id");
 
@@ -54,7 +54,7 @@ $(".delete_task").on("click", function() {
 });
 
 
-$(".toggle_task").on("click", function() {
+$(document).on("click", ".toggle_task", function(){
   task_id = $(this).data("task_id");
     $.ajax({
       url:"/api/task/"+task_id+"/update_state/in_list",
@@ -80,14 +80,9 @@ $(".toggle_task_on_summary").on("click", function() {
 });
 
 
-
-
-$(".show_task_description").on("click", function(){
+$(document).on("click", ".show_task_description", function(){
   task_description = $(this).data("task_description");
 
-
-
-  console.log(task_description)
   task_id = $(this).data("task_id");
   $('#task-description-modal').modal('show')
   if (task_description == 'None')  {
@@ -114,7 +109,8 @@ $(".show_task_description").on("click", function(){
 
 
 
-$(".task_edit").on("click", function() {
+// $(".task_edit").on("click", function() {
+$(document).on("click", ".task_edit", function() {
   task_id = $(this).data("task_id");
   current_task_name = $(this).data('task_name');
   current_points = $(this).data('points');
@@ -145,7 +141,7 @@ $(".task_edit").on("click", function() {
 });
 
 
-$(".claim_task").on("click", function() {
+$(document).on("click", ".claim_task", function() {
   console.log("click");
   task_id = $(this).closest(".button-div").data("task_id");
   list_id = $(this).closest(".button-div").data("list_id");
@@ -157,6 +153,7 @@ $(".claim_task").on("click", function() {
   });
 });
 
+// turn on tooltip option
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
-})
+});
