@@ -35,7 +35,30 @@ $("#update-list-name").on("click", function (){
   };
 });
 
+<<<<<<< HEAD
 $(document).on("click", ".delete_task", function(){
+=======
+$(".edit-list-description").on("click", function () {
+  $(".edit-list-description-input").removeClass("d-none");
+  $(".list-description").addClass("d-none");
+});
+
+$("#update-list-description").on("click", function (){
+  list_id = $(this).data("list_id");
+  new_list_description = $("#new_list_description").val().trim()
+  $.ajax({
+    url: "/api/list/description/"+list_id,
+    method: "PUT",
+    data: {new_list_description: new_list_description}
+  }).done(function (resp){
+    location.reload();
+  });
+});
+
+
+
+$(".delete_task").on("click", function() {
+>>>>>>> master
   list_id = $(this).data("list_id");
   task_id = $(this).data("task_id");
 
@@ -157,3 +180,17 @@ $(document).on("click", ".claim_task", function() {
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
+
+
+$(".archive_tasks").on("click", function() {
+  console.log("archive clicked")
+  list_id = $(this).data("list_id");
+  $.ajax({
+    url:"/api/archive/" + list_id,
+    method: "PUT"
+  }).done(function (resp) {
+    location.reload();
+  });
+});
+
+//$(".active").removeClass("active");
