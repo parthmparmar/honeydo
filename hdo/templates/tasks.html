@@ -12,6 +12,7 @@
   {% include "base/modal-yes-no.html" %}
   {% include "base/task-edit-modal.html" %}
   {% include "base/task-description-modal.html" %}
+
   <div class="lists-view mt-5 mb-3">
     <h1 class="list-title">{{ list.list_name }} <span>
         {% if current_user.id == list.list_owner_id %}
@@ -63,8 +64,8 @@
       </div>
     </form>
   </div>
-
-  <div class="task-view">
+{% include "components/filter_sort.html" %}
+  <div class="task-view" data-jplist-group="group1">
     {% for tasks in task_data.tasks %}
       {% with task=tasks %}
         {% include "/task_item.html" %}
@@ -83,4 +84,5 @@
 {% block javascript %}
 <script type="text/javascript" src="{{ url_for('static', filename='script/tasks_page.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='script/filter_sort.js') }}"></script>
 {% endblock %}

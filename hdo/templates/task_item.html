@@ -1,11 +1,11 @@
 
-<div class="d-flex align-items-center p-2 border-bottom task-item">
+<div class="task-div d-flex align-items-center p-2 border-bottom {{"me" if task.assigned_user.id == current_user.id}} {{ "open-task" if task.state == 0 }} {{ "completed-task" if task.state == 1 }}">
   <div class="d-flex col-9 align-items-center">
     <div class="check-circle">
       <button class="removeWhenEmpty checkbox toggle_task btn {{"d-none" if task.state == 0 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-check-circle fa-lg" style="color:green"></i></button>
       <button class="removeWhenEmpty checkbox toggle_task btn {{"d-none" if task.state == 1 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-circle fa-lg"></i></button>
     </div>
-    <div class="removeWhenEmpty task ml-2 mr-2 {{ "completed" if task.state == 1 }}" data-toggle="tooltip" data-placement="right" title="{{task.assigned_user.name}}">
+    <div class="task-name removeWhenEmpty task ml-2 mr-2 {{ "completed" if task.state == 1 }}" data-toggle="tooltip" data-placement="right" title="{{task.assigned_user.name}}">
       {{task.task_name}}
     </div>
     {% if task.list_name %}
@@ -19,10 +19,9 @@
   </div>
 
   <div class="removeWhenEmpty d-flex align-items-center justify-content-end due-date col-3">
-    <div class="">
-      {{task.due_date if task.due_date}}
-    </div>
-
+        <div class="">
+          {{task.due_date if task.due_date}}
+        </div>
     {% if task.points %}
     <div class="removeWhenEmpty badge badge-pill badge-primary ml-2">
       {{task.points}}
