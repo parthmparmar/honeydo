@@ -333,6 +333,17 @@ def api_update_task(task_id):
         new_date = request.form["due_date"] or None
         task_to_update.due_date = new_date
 
+        recur_ind = request.form["recur_ind"]
+        task_to_update.recur_ind = recur_ind
+
+        recur_method = request.form["recur_method"]
+        if recur_ind == "1":
+            recur_days = request.form["recur_days"]
+            task_to_update.recur_days = recur_days
+            
+        else:
+            task_to_update.recur_days = None
+
         db.session.flush()
         db.session.commit()
         return "task updated"

@@ -46,3 +46,12 @@ def tasks_by_owner_state(current_user, state):
 def tasks_by_id(task_id):
     tasks = Tasks.query.filter_by(task_id = task_id).first()
     return tasks
+
+'''
+#recurrence when none exists yet
+def new_recurrence(task_id, recur_method, recur_days):
+    if recur_method = "creation":
+        new_task = Tasks()
+#removing recurrence when it already was enabled
+
+#changing recurrence '''

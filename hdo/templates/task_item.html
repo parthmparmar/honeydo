@@ -37,7 +37,7 @@
 
       <button class="p-0 btn show_task_description" data-task_description="{{task.task_description}}" data-task_id = {{task.task_id}}><i class="far fa-sticky-note {{"contains-note" if task.task_description}}"></i></button>
 
-      <button data-task_id = {{task.task_id}} data-task_name = "{{task.task_name}}" data-due_date = {{task.due_date}} data-points={{task.points}} class="p-0 btn task_edit"><i class="fas fa-pencil-alt"></i></button>
+      <button data-task_id = {{task.task_id}} data-task_name = "{{task.task_name}}" data-due_date = {{task.due_date}} data-points={{task.points}} data-recur_ind={{tasks.recur_ind}} class="p-0 btn task_edit"><i class="fas fa-pencil-alt"></i></button>
       <button class="p-0 btn delete_task" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="fas fa-backspace"></i></button>
     </div>
   </div>

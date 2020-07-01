@@ -126,31 +126,58 @@ $(".show_task_description").on("click", function(){
   });
 });
 
-
-
+$("#recur_ind_box").on("click", function() {
+  if ($("#recur_ind_box").prop("checked") == true){
+    $(".recur-details").removeClass("d-none");
+  }
+  else {
+    $(".recur-details").addClass("d-none");
+  }
+});
 
 $(".task_edit").on("click", function() {
   task_id = $(this).data("task_id");
   current_task_name = $(this).data('task_name');
   current_points = $(this).data('points');
   current_date = $(this).data('due_date');
+  recur_ind = $(this).data('recur_ind');
 
   $('#task-edit-modal').modal('show')
 
   $('input[name="task_name"]').val(current_task_name);
   $('input[name="points"]').val(current_points);
   $('input[name="due_date"]').val(current_date);
+  if (recur_ind == 1){
+    $("#recur_ind_box").prop("checked", true);
+    $(".recur-details").removeClass("d-none");
+  }
 
 
   $("#submit-edited-task").on("click", function() {
     task_name = $("#new_task_name").val().trim()
     points = $("#new_points").val().trim()
     due_date = $("#new_due_date").val().trim()
+    recur_days = $("#days_recurrence").val().trim()
+    if($("#recur_ind_box").prop("checked") == true){
+               recur_ind = 1;
+           }
+    else {
+      recur_ind = 0;
+           }
+
+
+    if($("#days-creation").prop("checked") == true){
+                recur_method = "creation";
+            }
+    else if($("#days-completion").prop("checked") == true){
+                recur_method = "completion";
+            }
+
 
     $.ajax({
       url:"/api/task/"+task_id+"/update",
       method: "PUT",
-      data: {task_name: task_name, points: points, due_date: due_date}
+      data: {task_name: task_name, points: points, due_date: due_date, recur_days: recur_days, recur_ind: recur_ind, recur_method: recur_method}
     }).done(function (resp) {
       if (resp == "task updated"){
         location.reload();
