@@ -35,30 +35,7 @@ $("#update-list-name").on("click", function (){
   };
 });
 
-<<<<<<< HEAD
 $(document).on("click", ".delete_task", function(){
-=======
-$(".edit-list-description").on("click", function () {
-  $(".edit-list-description-input").removeClass("d-none");
-  $(".list-description").addClass("d-none");
-});
-
-$("#update-list-description").on("click", function (){
-  list_id = $(this).data("list_id");
-  new_list_description = $("#new_list_description").val().trim()
-  $.ajax({
-    url: "/api/list/description/"+list_id,
-    method: "PUT",
-    data: {new_list_description: new_list_description}
-  }).done(function (resp){
-    location.reload();
-  });
-});
-
-
-
-$(".delete_task").on("click", function() {
->>>>>>> master
   list_id = $(this).data("list_id");
   task_id = $(this).data("task_id");
 
@@ -78,13 +55,14 @@ $(".delete_task").on("click", function() {
 
 
 $(document).on("click", ".toggle_task", function(){
+  completeTask($(this));
   task_id = $(this).data("task_id");
     $.ajax({
       url:"/api/task/"+task_id+"/update_state/in_list",
       method: "PUT"
     }).done(function (resp) {
       if (resp == "task updated"){
-        location.reload();
+        // location.reload();
       }
     });
 });
@@ -176,21 +154,22 @@ $(document).on("click", ".claim_task", function() {
   });
 });
 
+
+function completeTask(element){
+  $(element).addClass("d-none");
+  $(element).siblings().removeClass("d-none");
+  if($(element).closest(".task-div").hasClass("open-task")){
+    $(element).closest(".task-div").removeClass("open-task").addClass("completed-task");
+    $(element).parent().next(".task-name").addClass("completed");
+  }
+  else{
+    $(element).closest(".task-div").addClass("open-task").removeClass("completed-task");
+    $(element).parent().next(".task-name").removeClass("completed");
+  };
+
+};
+
 // turn on tooltip option
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
-
-
-$(".archive_tasks").on("click", function() {
-  console.log("archive clicked")
-  list_id = $(this).data("list_id");
-  $.ajax({
-    url:"/api/archive/" + list_id,
-    method: "PUT"
-  }).done(function (resp) {
-    location.reload();
-  });
-});
-
-//$(".active").removeClass("active");
