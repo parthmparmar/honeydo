@@ -14,7 +14,7 @@
   {% include "base/task-description-modal.html" %}
 
   <div class="lists-view mt-5 mb-3">
-    <h1 class="list-title">{{ list.list_name }} <span>
+    <h1 class="list-title"><span id="list-name">{{ list.list_name }}</span> <span>
         {% if current_user.id == list.list_owner_id %}
         <button type="button" class="btn btn-small edit-list"><i class="fas fa-edit"></i></button>
         {% endif %}
@@ -34,12 +34,10 @@
       </span>
     </h6>
     <div class="input-group mb-3 d-none edit-list-description-input">
-      <form>
-        <input id="new_list_description" size = 110 name="new_list_description" type="text" class="form-control new_list_description" value="{{list.list_description or ""}}">
+        <input id="new_list_description" type="text" class="form-control new_list_description" value="{{list.list_description or ""}}">
         <div class="input-group-append">
           <button data-list_id={{list.list_id}} data-list_description={{list.list_description}} id="update-list-description" class="btn btn-outline-secondary" type="submit">Update</button>
         </div>
-      </form>
     </div>
 
 
@@ -47,20 +45,20 @@
   </div>
   {% include "/access.html" %}
   <br>
-
+  <div class="d-flex justify-content-around">
+    <h6 class="text-muted">Task Name</h6>
+    <h6 class="text-muted">Points <small>(optional)</small></h6>
+    <h6 class="text-muted">Due Date <small>(optional)</small></h6>
+  </div>
   <div class="list-add-div">
     <form class="add-task" action="/api/task/{{list_id}}/add" method="POST">
       <div class="input-group mb-3">
-
         <div class="input-group-prepend">
-          <button class="btn btn-outline-success" type="submit"><i class="fas fa-plus"></i></button>
+          <button id="new-task-submit" data-list_id = {{list_id}} class="btn btn-outline-success" type="button"><i class="fas fa-plus"></i></button>
         </div>
-
         <input name="new_task_name" id = "task_name" type="text" class="form-control" placeholder="Add a new task" autofocus="autofocus" required />
         <input name="new_points" id = "points" type="number" class="form-control" placeholder="Point Value" />
         <input name="new_due_date" id = "due_date" type="date" class="form-control" placeholder="Due Date" />
-
-
       </div>
     </form>
   </div>

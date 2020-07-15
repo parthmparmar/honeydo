@@ -1,5 +1,6 @@
 from hdo import db, login
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+import datetime
 
 class Users(UserMixin, db.Model):
 	__tablename__ = "Users"
@@ -45,6 +46,28 @@ class Tasks(db.Model):
 	repeat=db.Column(db.Integer)
 	task_description=db.Column(db.String)
 	task_completed_date=db.Column(db.DateTime)
+
+	@property
+	def to_dict(self):
+		dictionary = {
+			"task_id": self.task_id,
+			"list_id": self.list_id,
+			"task_name":self.task_name,
+			"task_owner_id": self.task_owner.id,
+			"task_owner_name": self.task_owner.name if self.task_owner else None,
+			"due_date": self.due_date,
+			"reset_time": self.reset_time,
+			"state": self.state,
+			"assigned_user_id": self.assigned_user_id,
+			"assigned_user_name": self.assigned_user.name if self.assigned_user else None,
+			"completed_by_id": self.completed_by_id,
+			"completed_by_name": self.completed_by.name if self.completed_by else None,
+			"points": self.points,
+			"repeat": self.repeat,
+			"task_description": self.task_description,
+			"task_completed_date": self.task_completed_date
+		}
+		return dictionary
 
 
 class Access(db.Model):
