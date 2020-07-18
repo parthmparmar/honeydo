@@ -274,6 +274,8 @@ def api_update_state(task_id, location):
             task_to_update.state = 1
             task_to_update.completed_by_id = current_user.id
             task_to_update.task_completed_date = datetime.now()
+            if task_to_update.recur_ind == 1 and Tasks.query.filter_by(parent_task_id = task_id).count() == 0:
+                auto_recur_create_new_task(task_id)
             if location == "in_summary":
                 flash(task_name + " was marked complete " + Markup('<a href="#" class="toggle_task" data-task_id={}>UNDO</a>'.format(task_id)))
         else:
@@ -336,11 +338,11 @@ def api_update_task(task_id):
         recur_ind = request.form["recur_ind"]
         task_to_update.recur_ind = recur_ind
 
-        recur_method = request.form["recur_method"]
+        #recur_method = request.form["recur_method"]
         if recur_ind == "1":
             recur_days = request.form["recur_days"]
             task_to_update.recur_days = recur_days
-            
+
         else:
             task_to_update.recur_days = None
 

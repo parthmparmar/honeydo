@@ -141,6 +141,7 @@ $(".task_edit").on("click", function() {
   current_points = $(this).data('points');
   current_date = $(this).data('due_date');
   recur_ind = $(this).data('recur_ind');
+  recur_days = $(this).data('recur_days');
 
   $('#task-edit-modal').modal('show')
 
@@ -150,14 +151,16 @@ $(".task_edit").on("click", function() {
   if (recur_ind == 1){
     $("#recur_ind_box").prop("checked", true);
     $(".recur-details").removeClass("d-none");
+    $('input[name="recur_days"]').val(recur_days);
   }
+
 
 
   $("#submit-edited-task").on("click", function() {
     task_name = $("#new_task_name").val().trim()
     points = $("#new_points").val().trim()
     due_date = $("#new_due_date").val().trim()
-    recur_days = $("#days_recurrence").val().trim()
+    recur_days = $("#recur_days").val().trim()
     if($("#recur_ind_box").prop("checked") == true){
                recur_ind = 1;
            }
@@ -166,18 +169,18 @@ $(".task_edit").on("click", function() {
            }
 
 
-    if($("#days-creation").prop("checked") == true){
-                recur_method = "creation";
-            }
-    else if($("#days-completion").prop("checked") == true){
-                recur_method = "completion";
-            }
+    //if($("#days-creation").prop("checked") == true){
+    //            recur_method = "creation";
+    //        }
+    //else if($("#days-completion").prop("checked") == true){
+    //            recur_method = "completion";
+    //        }
 
 
     $.ajax({
       url:"/api/task/"+task_id+"/update",
       method: "PUT",
-      data: {task_name: task_name, points: points, due_date: due_date, recur_days: recur_days, recur_ind: recur_ind, recur_method: recur_method}
+      data: {task_name: task_name, points: points, due_date: due_date, recur_days: recur_days, recur_ind: recur_ind}
     }).done(function (resp) {
       if (resp == "task updated"){
         location.reload();

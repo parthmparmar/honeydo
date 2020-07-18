@@ -2,6 +2,7 @@ from hdo.models import Users, Lists, Access, Tasks
 from hdo import db
 import string
 from random import *
+from datetime import datetime, timedelta, date
 
 
 def is_owner(user_id, list_id):
@@ -47,11 +48,14 @@ def tasks_by_id(task_id):
     tasks = Tasks.query.filter_by(task_id = task_id).first()
     return tasks
 
-'''
-#recurrence when none exists yet
-def new_recurrence(task_id, recur_method, recur_days):
-    if recur_method = "creation":
-        new_task = Tasks()
-#removing recurrence when it already was enabled
 
-#changing recurrence '''
+#create recurring task upon completion
+def auto_recur_create_new_task(task_id):
+    task_to_recur = Tasks.query.filter_by(task_id = task_id).first()
+    new_task = Tasks(list_id = task_to_recur.list_id, task_name = task_to_recur.task_name, task_owner_id = task_to_recur.task_owner_id, points = task_to_recur.points, due_date = (date.today() + timedelta(days = task_to_recur.recur_days)), state = 0, recur_ind = 1, recur_days = task_to_recur.recur_days, parent_task_id = task_to_recur.task_id)
+    db.session.add(new_task)
+    return new_task
+#delete task if parent is toggled to incompleted
+
+
+#changing recurrence
