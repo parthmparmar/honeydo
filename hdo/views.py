@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, flash, Markup
+from flask import Flask, redirect, url_for, render_template, request, flash, Markup, jsonify
 from hdo import app
 from flask_login import login_user, login_required, logout_user, current_user
 from hdo.models import Users, Lists, Access, Tasks
@@ -142,7 +142,20 @@ def api_task(list_id):
         #flash(task_name + " was added", "success")
         return redirect(url_for("list_display", list_id=list_id))
 
-
+@app.route("/api/task/add/<list_id>", methods=["POST"])
+@login_required
+def api_task_new(list_id):
+    if request.method == "POST":
+        task_name = request.form["new_task_name"]
+        due_date = request.form["new_due_date"] or None
+        points = request.form["new_points"] or 0
+        new_task = Tasks(list_id=list_id, task_name=task_name, task_owner_id=current_user.id, due_date=due_date, state=0, points=points)
+        db.session.add(new_task)
+        db.session.flush()
+        db.session.refresh(new_task)
+        return_task = new_task.to_dict
+        db.session.commit()
+        return jsonify(return_task)
 
 @app.route("/api/list/<list_id>", methods=["POST", "DELETE", "PUT"])
 @login_required
@@ -256,7 +269,7 @@ def api_delete_task(list_id, task_id):
         task_name = task_to_delete.task_name
         db.session.delete(task_to_delete)
         db.session.commit()
-        flash(task_name + " was deleted", "danger")
+        # flash(task_name + " was deleted", "danger")
         return "task deleted"
 
 
@@ -289,30 +302,31 @@ def api_update_state(task_id, location):
 def api_assign_user(list_id, task_id):
     user_id = current_user.id
     list = Lists.query.filter_by(list_id = list_id).first()
-    list = list_num_users(list)
-    if list.num_users > 1:
-        action = "claimed"
-    else:
-        action = "prioritized"
+    # NOTE: no flash msg is being used so we don't need this code
+    # list = list_num_users(list)
+    # if list.num_users > 1:
+    #     action = "claimed"
+    # else:
+    #     action = "prioritized"
     if request.method == "PUT":
         task_to_update = Tasks.query.filter_by(task_id=task_id).first()
         task_name = task_to_update.task_name
         if not task_to_update.assigned_user_id:
             task_to_update.assigned_user_id = user_id
             db.session.commit()
-            flash(task_name + " was " + action + " by you", "success")
-            return "success"
+            # flash(task_name + " was " + action + " by you", "success")
+            return current_user.name
         elif task_to_update.assigned_user_id == user_id:
             task_to_update.assigned_user_id = None
             db.session.commit()
-            flash(task_name + " was un-" + action + " by you", "success")
-            return "success"
+            # flash(task_name + " was un-" + action + " by you", "success")
+            return ""
         elif task_to_update.assign_user_id != user_id:
             if is_owner(current_user.id, list_id):
-                task_to_update.assigned_user_id = assigned_user_id
+                task_to_update.assigned_user_id = user_id
                 db.session.commit()
-                flash(task_name + " was " + action + " by you", "success")
-                return "success"
+                # flash(task_name + " was " + action + " by you", "success")
+                return current_user.name
             else:
                 flash("Task has been claimed by someone else, please contact list owner to change", "warning")
                 return "not allowed"
@@ -499,3 +513,10 @@ def unarchive(task_id):
         db.session.flush()
         db.session.commit()
         return "task unarchived"
+
+@app.route("/test")
+def test():
+    task = Tasks.query.filter_by(task_id = 7).first()
+    print(task)
+    task_d = task.to_dict
+    return jsonify(task_d)

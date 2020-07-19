@@ -1,11 +1,11 @@
 
-<div class="d-flex align-items-center p-2 border-bottom task-item">
+<div id = {{task.task_id}} class="task-div d-flex align-items-center p-2 border-bottom {{"me" if task.assigned_user.id == current_user.id}} {{ "open-task" if task.state == 0 }} {{ "completed-task" if task.state == 1 }}">
   <div class="d-flex col-9 align-items-center">
     <div class="check-circle">
-      <button class="removeWhenEmpty checkbox toggle_task btn {{"d-none" if task.state == 0 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-check-circle fa-lg" style="color:green"></i></button>
-      <button class="removeWhenEmpty checkbox toggle_task btn {{"d-none" if task.state == 1 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-circle fa-lg"></i></button>
+      <button class="removeWhenEmpty checkbox toggle_task btn done {{"d-none" if task.state == 0 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-check-circle fa-lg" style="color:green"></i></button>
+      <button class="removeWhenEmpty checkbox toggle_task btn not-done {{"d-none" if task.state == 1 }}" data-task_id={{task.task_id}} data-list_id={{task.list_id}}><i class="checked far fa-circle fa-lg"></i></button>
     </div>
-    <div class="removeWhenEmpty task ml-2 mr-2 {{ "completed" if task.state == 1 }}" data-toggle="tooltip" data-placement="right" title="{{task.assigned_user.name}}">
+    <div class="task-name removeWhenEmpty task ml-2 mr-2 {{ "completed" if task.state == 1 }}" data-toggle="tooltip" data-placement="right" title="{{task.assigned_user.name}}">
       {{task.task_name}}
     </div>
     {% if task.list_name %}
@@ -19,15 +19,13 @@
   </div>
 
   <div class="removeWhenEmpty d-flex align-items-center justify-content-end due-date col-3">
-    <div class="">
-      {{task.due_date if task.due_date}}
-    </div>
-
-    {% if task.points %}
-    <div class="removeWhenEmpty badge badge-pill badge-primary ml-2">
+        <div class="due-date-value">
+          {{task.due_date if task.due_date}}
+        </div>
+  <div class="removeWhenEmpty badge badge-pill badge-primary ml-2 {{"d-none" if task.points < 1}}">
       {{task.points}}
-    </div>
-    {% endif %}
+  </div>
+
     <div class="removeWhenEmpty ml-2 button-div" data-task_id = {{task.task_id}} data-list_id={{task.list_id}}>
       {% if task.list.list_access|length > 1 %}
       <button class="p-0 btn claim_task {{"claimed" if task.assigned_user_id}}"><i class="fas fa-hand-paper"></i></button>
