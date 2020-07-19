@@ -46,6 +46,9 @@ class Tasks(db.Model):
 	repeat=db.Column(db.Integer)
 	task_description=db.Column(db.String)
 	task_completed_date=db.Column(db.DateTime)
+	recur_ind = db.Column(db.Integer)
+	recur_days = db.Column(db.Integer)
+	parent_task_id = db.Column(db.Integer)
 
 	@property
 	def to_dict(self):

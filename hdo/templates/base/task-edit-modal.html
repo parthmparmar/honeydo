@@ -7,23 +7,52 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="task_name">Task Name</label>
-          <input name = "task_name" type="task_name" class="form-control" id="new_task_name" required>
+      <form>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="task_name">Task Name</label>
+            <input name = "task_name" type="task_name" class="form-control" id="new_task_name" required>
+          </div>
+          <div class="form-group">
+            <label for="points">Points</label>
+            <input name = "points" type="number" class="form-control" id="new_points">
+          </div>
+          <div class="form-group">
+            <label for="due_date">Due Date</label>
+            <input name= "due_date" type="date" class="form-control" id="new_due_date">
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" id="recur_ind_box" type="checkbox">
+            <label class="form-check-label" for="defaultCheck1">
+              Recur upon completion
+            </label>
+          </div>
+            <div class="form-group recur-details d-none">
+            <!--  <div class="radio">
+                <label><input type="radio" id="days-creation" name="recurrence" checked>Days After Creation</label>
+              </div>
+              <div class="radio">
+                <label><input type="radio" id="days-completion" name="recurrence">Days After Completion</label>
+              </div> -->
+              <div>
+                <label for="recur_days"></label>
+                <input name = "recur_days" type="number" class="form-control" id="recur_days" placeholder="Enter Days" required>
+              </div>
+            </div>
+
         </div>
-        <div class="form-group">
-          <label for="points">Points</label>
-          <input name = "points" type="points" class="form-control" id="new_points">
+
+        <div class="modal-footer">
+          <input type="submit" id = "submit-edited-task" class="btn btn-primary" data-dismiss="modal">
         </div>
-        <div class="form-group">
+      </form>
+        <!-- <div class="form-group">
           <label for="due_date">Due Date</label>
           <input name= "due_date" type="date" class="form-control" id="new_due_date">
-        </div>
+        </div> -->
       </div>
-      <div class="modal-footer">
+      <!-- <div class="modal-footer">
         <button type="submit" id = "submit-edited-task" class="btn btn-primary" data-dismiss="modal" >Save changes</button>
-      </div>
+      </div> -->
     </div>
-  </div>
 </div>
