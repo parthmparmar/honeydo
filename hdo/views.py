@@ -40,7 +40,7 @@ def login():
                 flash("Welcome Back " + user.name, "success")
                 return redirect(url_for("all_tasks_page"))
 
-        flash("email and/or password incorrect, please try again." "warning")
+        flash("email and/or password incorrect, please try again.", "warning")
         return redirect(url_for("login"))
 
 
@@ -513,6 +513,16 @@ def unarchive(task_id):
         db.session.flush()
         db.session.commit()
         return "task unarchived"
+
+@app.route("/auto-sign-me-in")
+def autoSignIn():
+    if request.method == "GET":
+        # email = "test@test.com"
+        email = "app.honeydo@gmail.com"
+        user = Users.query.filter_by(email=email).first()
+        login_user(user)
+        flash("You have been auto signed into the demo account, feel free to log off and create an account.", "success")
+        return redirect(url_for("all_tasks_page"))
 
 @app.route("/test")
 def test():
